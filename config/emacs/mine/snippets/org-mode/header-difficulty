@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: header-difficulty
+# key: difficulty:::
+# --
+
+:PROPERTIES:
+:DIFFICULTY: ${1:difficulty}
+:END:
+
+$0

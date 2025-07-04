@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+[ "$witherNose" != 'yes' ] && exit
+
+~/.config/scripts/cron/notify "${0##*/}" 'moisten your nose' low

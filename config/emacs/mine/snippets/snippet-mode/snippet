@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: snippet
+# key: snippet
+# --
+
+# -*- mode: snippet -*-
+# name: `(get-only-file-name buffer-file-name)`
+# key: ${1:snippet key}
+# --
+
+$0

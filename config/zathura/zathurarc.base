@@ -1,0 +1,9 @@
+# -*- mode: conf-space -*-
+
+set font "JetBrainsMonoNL NFM 8"
+set selection-clipboard clipboard
+
+map <C-o> feedkeys ":nohl<Return>"
+map <C-i> recolor
+
+map <C-k> feedkeys ":exec ~/.config/scripts/notify-send-copy 'zathura' 'filename has been copied to clipboard' $FILE<Return>"

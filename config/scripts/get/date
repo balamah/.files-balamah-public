@@ -1,0 +1,16 @@
+#!/bin/sh
+
+writeReadCalendar() {
+	file=/tmp/.files-balamah/calendar
+	date +"%Y" | xargs cal > "$file"
+	setsid -f st -e script -qfc "less '$file'" /dev/null 
+}
+
+case $BUTTON in
+	1) writeReadCalendar                                     ;;
+	2) setsid -f emacsclient -c -s "default" -a "org-agenda" \
+				   --eval "(org-agenda-delete-windows)"      ;;
+	3) setsid -f emacsclient -c -s 'default' -e '(calendar)' ;;
+esac
+
+date +'%a %d.%m.%Y'

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+changeLayout() {
+	# $1 :: layouts
+
+	layout=$(toggle "$1" /tmp/.files-balamah/layout)
+	xkb-switch -s $layout 
+}
+
+layouts=$(xkb-switch -l | sed ':a;N;$!ba;s/\n/,/g')
+
+[ "$layoutMethodChange" = 'sxhkd' ] && changeLayout "$layouts"
+
+~/.config/scripts/notify-keymap-change 

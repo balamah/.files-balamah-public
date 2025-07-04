@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+link="https://flathub.org/repo/flathub.flatpakrepo"
+
+flatpak remote-add --if-not-exists --user flathub "$link"
+sudo flatpak remote-add --if-not-exists flathub   "$link"
+
+cat $packagesList/flatpak | xargs sudo flatpak install -y
+
+[ "$flatpakHomePermission" = "yes" ] && \
+	~/.files-balamah/install/modules/flatpak-add-perms 

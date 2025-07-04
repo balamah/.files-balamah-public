@@ -1,0 +1,96 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf 
+
+function get-link () {
+	[ -z "$1" ] || [ -z "$(file $1 | grep link)" ] && \
+		echo "it's not link" && return 1
+
+	file "$1" | awk '{print $5}'
+}
+
+function flatpak-permissions-change () {
+	case "$flatpakHomePermission" in
+		"yes") ~/.files-balamah/install/modules/flatpak-add-perms ;;
+		"no") ~/.files-balamah/install/modules/flatpak-delete-perms ;;
+	esac
+}
+
+function install-packages () {
+	~/.files-balamah/install/modules/package-install
+}
+
+function install-profile-packages () {
+	~/.files-balamah/install/modules/profile-packages-install 
+}
+
+function add-pkg () {
+	[ -z "$1" ] || [ -z "$2" ] && \
+		echo '$1 should be distro. $2 should be package name' && return 1
+
+	pkgList=~/.files-balamah/install/pkg-list/$1
+	[ ! -f "$pkgList" ] && echo "this distro doesn't exist in your dots" && return 1
+
+	echo "$2" >> $pkgList
+	cat $pkgList | sort | tee $pkgList 2> /dev/null
+}
+
+function crontab-update () {
+	# it reads your crontab and adds to dotfiles
+	
+	file=/var/spool/cron/$USER
+	[ ! -f "$file" ] && echo "you don't have crontab on your system" && return 1
+	[ ! -s "$file" ] && echo "crontab is empty" && return 1
+
+	cat "$file" > ~/.files-balamah/auto/crontab
+	echo 'crontab in ~/.files-balamah is successfully updated'
+}
+
+function recompile () {
+	~/.files-balamah/install/modules/compile-programs
+}
+
+function update () {
+	echo "Pulling repos..."
+	for repo in ~/.files-balamah $wallpapersPath; do
+		cd "$repo" && git pull
+	done
+
+	date=$(date +"%d%m%Y")
+	mkdir -p "~/.cache/files-balamah/$date" 2> /dev/null
+	cp ~/.files-balamah/{settings.conf,python-scripts.ini} "~/.cache/files-balamah/$date"
+	echo "Copied config files to ~/.cache/files-balamah/$date"
+
+	echo "Linking new binaries..."
+	~/.files-balamah/install/modules/link 
+
+	echo "Installing packages..."
+	install-packages
+	install-profile-packages
+
+	echo "Recompiling software..."
+	recompile
+
+	cat <<EOF
+*----*----*----*----*----*----*----*---- <--
+Config files of my dots are copied to ~/.cache/files-balamah/.
+Some functional may not work after pull, therefore copy these files and configure them:
+settings.conf.example --> settings.conf
+python-scripts.ini.example --> python-scripts.ini
+
+Run \`git log\` inside ~/.files-balamah to see some important changes
+*----*----*----*----*----*----*----*---- <--
+EOF
+}
+
+function help () {
+	cat "$0" | grep '^function' | awk '{print $2}' | sort
+}
+
+function reinstall () {
+	~/.files-balamah/install/install.sh 
+}
+
+[ -z "$1" ] && dots help
+
+eval "$@"

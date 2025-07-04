@@ -1,0 +1,42 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf 
+
+errorNotification() {
+	[ "$getWeatherClickError" = 'yes' ] && \
+		notify-send "${0##*/}" 'Wego error occured, check therefore' -u critical
+}
+
+getCity() {
+	tmpFile=/tmp/.files-balamah/recent/weather-cities 
+	city=$(cat "$tmpFile" | sort | uniq | dmenu -p "󰴕 Choose city to view forecast in")
+
+	[ -z "$city" ] && exit || echo "$city" >> "$tmpFile"
+
+	echo "$city"
+}
+
+weatherCommand() {
+	wego --days 5 "$@"
+}
+
+writeReadForecast() {
+	file=/tmp/.files-balamah/wego-output
+
+	[ ! -z "$1" ] && weatherCommand --location "$(getCity)" > "$file"
+	[ -z "$1" ] && weatherCommand > "$file"
+
+	if [ ! -s "$file" ]; then
+		errorNotification
+		return
+	fi
+
+	setsid -f st -e script -qfc "less -R '$file'" /dev/null 
+}
+
+case $BUTTON in
+	 1) writeReadForecast         ;;
+	 3) writeReadForecast --other ;;
+esac
+
+python3 ~/.config/scripts/python/weather/main.py

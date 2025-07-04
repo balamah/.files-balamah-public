@@ -1,0 +1,36 @@
+#!/bin/sh
+
+quantityFile=/tmp/.files-balamah/exercise-quantity
+
+reset() {
+	echo '0' > "$quantityFile"
+}
+
+change() {
+	case "$1" in 
+		"+") action="increase" ;;
+		"-") action="decrease" ;;
+	esac
+
+	amount=$(printf "5\n10\n20\n30\n40\n50" | dmenu -p " Enter amount to $action") 
+	[ -z "$amount" ] || [ -z "$1" ] && exit
+	
+	[ "$1" = '-' ] && [ "$amount" -gt "$quantity" ] && \
+		notify-send "${0##*/}" "$amount > $quantity" && exit 1
+
+	echo "$quantity $1 $amount" | bc > "$quantityFile"
+}
+
+[ ! -f "$quantityFile" ] && reset
+
+quantity=$(cat "$quantityFile")
+
+[ "$quantity" != 0 ] && additional=". You need to do some exercises $quantity times"
+action=$(printf "increase\ndecrease\nreset" | dmenu -p "󱅝 Choose execises action$additional")
+
+case "$action" in
+	"reset") reset ;;
+	"increase") change + ;;
+	"decrease") change - ;;
+	*) exit ;;
+esac

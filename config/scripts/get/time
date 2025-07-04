@@ -1,0 +1,8 @@
+#!/bin/sh
+
+case $BUTTON in
+	1) setsid -f emacsclient -c -s 'default' -a "org-agenda" \
+				   --eval "(org-agenda-delete-windows)" ;;
+esac
+
+date +'%H:%M:%S'

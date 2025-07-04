@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: start-presentation
+# key: <p
+# --
+
+#+TITLE: ${1:title}
+#+AUTHOR: ${2:author}
+#+DATE: `(insert (format-time-string "%d.%m.%Y" (current-time)))`
+#+PRESENTATION_EXPORT_NAME: ${3:export name}
+
+$0

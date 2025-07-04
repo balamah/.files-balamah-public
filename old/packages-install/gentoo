@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# install libraries
+echo "where you will choose xdg-desktop-portal, choose xdg-desktop-portal-gtk to avoid problems"
+# TODO add gummy
+cat ~/.files-balamah/install/packages-install/pkg-list/gentoo.pkg-list | sudo emerge -

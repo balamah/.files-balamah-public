@@ -1,0 +1,3 @@
+#!/bin/sh
+
+last -R balamah | head -n 1 | awk '{print $1, "at", $6}'

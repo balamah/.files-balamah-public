@@ -1,0 +1,11 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh
+
+location=$(br ~/.config/scripts/resources/dmenu/bookmarks/image\ directories | \
+	dmenu -l 24 -p ' Choose location to save image' | awk '{print $2}' | \
+	sed "s@\~@$HOME@g")
+
+[ -z "$location" ] && exit 1
+
+sleep 0.1 && flameshot screen -p "$location"

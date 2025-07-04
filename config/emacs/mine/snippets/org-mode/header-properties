@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: header-properties
+# key: properties:::
+# --
+
+:PROPERTIES:
+$0
+:END:

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+distro=$(~/.config/scripts/get/distro/name)
+
+case "$distro" in
+	"ubuntu")		echo 1 ;;
+	"debian")		echo 1 ;;
+	"mint")			echo 2 ;;
+	"lmde")			echo 2 ;;
+	"pop_os")		echo 4 ;;
+	"manjaro")		echo 2 ;;
+	"fedora")		echo 4 ;;
+	"endeavour")	echo 5 ;;
+	"elementary")	echo 4 ;;
+	"raspbian")		echo 1 ;;
+	"parrot")		echo 4 ;;
+	"solus")		echo 4 ;;
+    "mageia")		echo 4 ;;
+    "opensuse")		echo 2 ;;
+    "nixos")		echo 4 ;;
+    "arch")			echo 4 ;;
+    "artix")		echo 4 ;;
+    "void")			echo 2 ;;
+    "gentoo")		echo 5 ;;
+    "slackware")	echo 4 ;;
+    "devuan")		echo 5 ;;
+    "guix")			echo 3 ;;
+    "freebsd")		echo 1 ;;
+    *)				echo 1 ;;
+esac

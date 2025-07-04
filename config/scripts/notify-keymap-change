@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf 
+
+[ "$enableKeyboardConfig" != 'yes' ] && exit
+
+[ "$panelIndicatorsVariation" = 'dwmblocks' ] && pkill -RTMIN+6 dwmblocks 
+
+layout=$(~/.config/scripts/get/layout/layout)
+flag=$(~/.config/scripts/get/layout/flag "$layout")
+
+dunstify -r 1488 -u low -t 1000 "${0##*/}" "Layout has been changed to $flag $layout"

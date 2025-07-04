@@ -1,0 +1,7 @@
+#!/bin/sh 
+
+. ~/.files-balamah/settings.conf 
+
+[ "$witherFace" != 'yes' ] && exit
+
+~/.config/scripts/cron/notify "${0##*/}" 'smear your face' low

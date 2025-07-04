@@ -1,0 +1,3 @@
+All desktop entries from here go to ready/.
+From ready/ directory, it links to /usr/share/applications/.
+It was made this way to make desktop entries compatible with other user names

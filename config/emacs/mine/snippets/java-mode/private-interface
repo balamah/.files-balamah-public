@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: interface
+# key: pinterface
+# --
+
+private interface `(file-name-sans-extension (file-name-nondirectory buffer-file-name))` {
+    $0
+}

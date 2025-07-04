@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: lprint
+# key: lprint()
+# --
+
+System.out.print($0);

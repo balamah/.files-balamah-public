@@ -1,0 +1,207 @@
+# -*- mode: sxhkdrc -*-
+
+# reload sxhkd configuration file
+super + Escape
+	pkill -USR1 -x sxhkd ;\
+	notify-send 'sxhkd' "sxhkd has been restarted"
+
+# terminal
+super + shift + Return
+	~/.local/bin/tabbed-st
+
+# Clipboard
+super + control + shift + v; v
+	clipmenu
+
+super + control + shift + v; d
+	~/.config/scripts/dmenu/clipboard-clear
+
+super + control + shift + v; c
+	~/.config/scripts/dmenu/copy-text
+
+# dmenu and some other scripts
+super + control + shift + b; w
+	cat /tmp/.files-balamah/recent/wallpapers | sort | uniq | xargs sxiv
+
+super + r
+	~/.config/scripts/dmenu/desktop-entry-launch
+
+super + shift + r
+	~/.config/scripts/dmenu/command-launch
+
+shift + Print
+	~/.config/scripts/dmenu/flameshot
+
+control + shift + Print
+	~/.config/scripts/dmenu/flameshot-save
+
+super + control + shift + b; y
+	~/.config/scripts/dmenu/emoji-picker
+
+super + control + shift + b; r
+	~/.config/scripts/dmenu/desktop-entry-launch-firejail
+
+super + control + shift + b; u
+	~/.config/scripts/dmenu/favorite-apps
+
+super + control + shift + b; i
+	~/.config/scripts/dmenu/wireguard-vpn-connect
+
+super + control + shift + b; b
+	~/.config/scripts/dmenu/bookmarks
+
+super + control + shift + b; c
+	~/.config/scripts/dmenu/calculator
+
+super + control + shift + b; g
+	~/.config/scripts/dmenu/wifi-connect
+
+super + control + shift + b; s
+	~/.config/scripts/dmenu/currency-convert
+
+super + control + shift + b; d
+	~/.config/scripts/dmenu/daemon-launcher
+
+super + shift + d
+	~/.config/scripts/dmenu/kill-process
+
+super + control + shift + b; h
+	~/.config/scripts/dmenu/password-generator
+
+super + control + shift + b; j
+	~/.config/scripts/dmenu/lisp-case-text-format
+
+super + control + shift + b; m
+	~/.config/scripts/dmenu/manual
+
+super + control + shift + b; v
+	~/.config/scripts/dmenu/copy-text
+
+super + control + shift + b; l
+	~/.config/scripts/dmenu/layout-converter
+
+super + control + shift + b; z
+	~/.config/scripts/dmenu/exercise-times-counter
+
+super + control + shift + b; n
+	~/.config/scripts/dmenu/minecraft-config-manager
+
+super + control + shift + b; shift + n
+	~/.config/scripts/dmenu/minecraft-config-manager sandbox
+
+super + control + shift + b; M
+	~/.config/scripts/dmenu/monitors-control
+
+super + control + shift + o
+	~/.config/scripts/dmenu/shutdown shutdown
+
+super + control + shift + p
+	~/.config/scripts/dmenu/shutdown reboot
+
+super + control + shift + semicolon
+	~/.config/scripts/dmenu/powermenu
+
+# multimedia
+XF86Audio{Play,Prev,Next}
+	~/.config/scripts/app-audio-control {play-pause,previous,next}
+
+shift + XF86AudioPlay
+	~/.config/scripts/app-audio-control loop
+
+control + XF86AudioPlay
+	~/.config/scripts/app-audio-control shuffle
+
+shift + XF86Audio{Prev,Next}
+	~/.config/scripts/app-audio-control rewind {-,+}
+
+control + shift + XF86Audio{Prev,Next}
+	~/.config/scripts/app-audio-control rewind {-,+} radical
+
+shift + XF86Audio{Lower,Raise}Volume
+	~/.config/scripts/app-audio-control {-,+}
+
+super + control + shift + {comma,period}
+    ~/.config/scripts/app-audio-control shift {unshift,shift}
+
+shift + XF86AudioMute
+	~/.config/scripts/app-audio-control mute
+
+# adjust brightness
+{_, shift +}XF86MonBrightness{Down,Up}
+	echo "{2,10}" | xargs light -{U,A}
+
+# daily usage programs for me
+super + control + q
+    firefox
+
+super + control + w
+	~/.config/scripts/run-spotify
+
+super + control + {e, r, t, y}
+    flatpak run {org.telegram.desktop,com.viber.Viber,com.discordapp.Discord}
+
+super + control + y
+	flatpak run com.valvesoftware.Steam
+
+super + control + u
+    pavucontrol
+
+super + control + {a, s, d, f, g}
+    ~/.local/bin/tabbed-st {ranger, nvim, htop, cmatrix, nmtui}
+
+super + control + j
+	st -e ~/.config/scripts/speedtest
+
+## emacs
+super + control + h; h
+    emacsclient -c -s 'default'
+
+super + control + h; a
+    emacsclient -c -s "default" -a "org-agenda" --eval "(org-agenda-delete-windows)"
+
+super + control + h; d
+    emacs --debug-init
+
+super + control + h; i
+	emacsclient -s "default" -a "emacs-everywhere" --eval "(emacs-everywhere)"
+
+super + control + h; m
+	emacsclient -c -s "default" -a "org-capture" --eval "(org-capture)"
+
+super + control + h; s
+	emacsclient -c -s "default" -a "scratch-buffer" --eval "(scratch-buffer)"
+
+super + control + h; p
+	~/.config/scripts/get/emacs/config | xargs -r emacs --with-profile
+
+super + control + h; P
+	~/.config/scripts/get/emacs/server | xargs -I "%" emacsclient -s "%" -c
+
+# widgets
+super + shift + w; d
+	~/.config/scripts/widgets/launch-widget ~/.config/scripts/widgets/start/dashboard
+
+# file manager
+super + e; {e, r}
+	nemo {~, /}
+
+super + e; m
+	[ -d "/run/media/$USER" ] && nemo /run/media/$USER || \
+	    notify-send "nemo" "no devices mounted"
+
+# take screenshot
+Print
+	flameshot gui
+
+super + shift + s
+    flameshot gui
+
+shift + Print
+    ~/.config/scripts/dmenu/flameshot
+
+shift + control + Print
+    ~/.config/scripts/dmenu/flameshot-save
+
+# other
+super + control + shift + x
+	xkill

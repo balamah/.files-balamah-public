@@ -1,0 +1,26 @@
+#!/bin/bash
+
+. ~/.files-balamah/install/modules/functions.sh 
+. ~/.files-balamah/settings.conf
+
+link ~/.files-balamah/config/* ~/.config/
+link ~/.files-balamah/home/.* ~/
+link ~/.files-balamah/bin/* ~/.local/bin/
+link ~/.config/scripts ~/.config/10-scripts
+
+# copy crontab
+# linked crontab doesn't work unfortunately
+sudo chown -R $USER:$USER /var/spool/cron/
+cp ~/.files-balamah/auto/crontab /var/spool/cron/$USER
+
+# create xsession
+createXsession() {
+	cp ~/.files-balamah/init/dotfiles-balamah.desktop.example \
+		~/.files-balamah/init/dotfiles-balamah.desktop
+
+	sed -i "s@\$HOME@$HOME@g" ~/.files-balamah/init/dotfiles-balamah.desktop
+
+	sudo cp ~/.files-balamah/init/dotfiles-balamah.desktop /usr/share/xsessions/
+}
+
+[ "$createXsession" = 'yes' ] && createXsession

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: src-block-begin
+# key: <S
+# --
+
+#+begin_src $0

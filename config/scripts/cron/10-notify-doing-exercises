@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+quantity=$(cat /tmp/.files-balamah/exercise-quantity)
+
+[ -z "$quantity" ] || [ "$quantity" -lt "$minimumQuantity" ] && exit
+
+~/.config/scripts/cron/notify "${0##*/}" "do $quantity times some exercises"

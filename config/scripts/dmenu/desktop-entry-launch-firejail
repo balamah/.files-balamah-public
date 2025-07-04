@@ -1,0 +1,13 @@
+#!/bin/sh
+
+firejailProfile=$(find /etc/firejail/ -type f -name "*.profile" | \
+					  sort | sed 's@.*/@@;s/\.profile$//' | \
+					  dmenu -p ' Choose firejail profile to launch desktop entry')
+
+[ -z "$firejailProfile" ] && exit
+
+command=$(dmenu_path | dmenu -p " Launch command (in $firejailProfile profile)")
+
+[ -z "$command" ] && exit
+
+firejail --profile="$firejailProfile" "$command" &

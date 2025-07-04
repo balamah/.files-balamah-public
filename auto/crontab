@@ -1,0 +1,18 @@
+# Commands that have checks should be in separated scripts in 
+# ~/.config/scripts/cron/
+
+# minute, hour, day, month, day of week
+# m h d m dow
+15 * * * *      ~/.config/scripts/cron/notify 'cron' 'drink water' low
+*/30 * * * *    ~/.config/scripts/cron/10-notify-doing-exercises
+15 * * * *      ~/.config/scripts/cron/20-notify-washing-nose
+*/20 * * * *    ~/.config/scripts/cron/30-notify-charging-laptop
+15 */5 * * *    ~/.config/scripts/cron/40-notify-smearing-arms
+15 */5 * * *    ~/.config/scripts/cron/50-notify-smearing-lips
+15 */5 * * *    ~/.config/scripts/cron/60-notify-smearing-face
+15 */2 * * *    ~/.config/scripts/cron/70-notify-moisten-nose
+15 */5 * * *    ~/.config/scripts/cron/80-notify-smearing-everything
+
+*/5 * * * *     ~/.config/scripts/get/weather > /tmp/.files-balamah/10-curWeather.tmp
+
+0 */3 * * *     cp -r ~/.minecraft/saves /home/data/important/minecraft

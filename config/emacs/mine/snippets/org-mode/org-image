@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: org-image
+# key: oimage:::
+# --
+
+[[file:~/Org/images/$0]]

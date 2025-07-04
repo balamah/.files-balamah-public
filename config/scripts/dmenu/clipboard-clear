@@ -1,0 +1,9 @@
+#!/bin/sh
+
+decision=$(printf "no\nyes" | dmenu -p "Are you sure you want to clear clipboard?")
+
+[ "$decision" != 'yes' ] && exit
+
+clipdel -d "$(echo -n "$1")"
+
+notify-send 'clipmenu' "clipboard has cleared"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh
+
+tmpFile=/tmp/.files-balamah/recent/calculator
+
+equation=$((cat $tmpFile && echo) | tac | uniq -u | sed '/^$/d' | \
+			   dmenu -p " Write equation" | rip)
+
+result=$(echo "$equation" | sed 's/\\times/*/g' | \
+	sed 's/_/-/g ; s/=/+/g ; s@\*\*@\^@g ; s/S/sqrt/g ; s/--/+/g ; s/Z/000/g' | \
+	bc -l)
+
+[ -z "$result" ] && exit || echo "$equation" >> $tmpFile
+
+~/.config/scripts/notify-send-copy "${0##*/}" "Result is $result" "$result"

@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# FIXME: Fix errors here
+# Migrate openrgb start into separated script
+
+. ~/.files-balamah/settings.conf 
+
+[ "$enableKeyboardConfig" != 'yes' ] && exit
+
+setxkbmapExecute() {
+	setxkbmap -layout "$layoutsList" -option ctrl:nocaps "$@" &	
+}
+
+keyboardConfig() {
+	[ -z "$1" ] && layoutsList="$layouts" || layoutsList="$1"
+	
+	[ "$layoutMethodChange" = 'xinit' ] && \
+		setxkbmapExecute -option grp:win_space_toggle || setxkbmapExecute
+	
+	xset r rate $symbolRepetitionDelay $symbolRepetitionRate &
+	[ "$enableNumlockStart" = 'yes' ] && numlockx
+}
+
+openrgbStart() {
+	pgrep -x openrgb || openrgb --startminimized --profile "$openrgbProfile" &
+}
+
+[ "$profile" != 'no-wm' ] && keyboardConfig "$1"
+[ "$enableOpenrgb" = 'yes' ] && openrgbStart

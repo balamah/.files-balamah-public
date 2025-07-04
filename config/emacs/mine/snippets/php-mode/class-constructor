@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: class-constructor
+# key: class()
+# --
+
+class `(file-name-sans-extension (file-name-nondirectory buffer-file-name))` 
+{
+    public function __construct()
+    {
+        $0
+    }
+}

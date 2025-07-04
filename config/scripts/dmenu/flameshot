@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cat ~/.config/scripts/resources/dmenu/flameshot-actions | \
+	dmenu -p "󰹑 Choose flameshot action" -i -l 10 | awk '{print $1}' | \
+	xargs -I "%" flameshot "%"

@@ -1,0 +1,20 @@
+x11-apps/xinit xorg-server numlockx slock
+x11-misc/xclip x11-apps/xrandr x11-misc/xdotool x11-apps/setxkbmap 
+x11-libs/libX11 x11-libs/libXft x11-libs/libXinerama 
+app-misc/cmatrix 
+lsd 
+x11-misc/screenkey
+fontconfig dev-python/pip 
+feh 
+lxappearance breeze-icons 
+x11-misc/xcompmgr
+xdotool acpi 
+sys-apps/dbus gtk media-sound/playerctl 
+nemo nemo-fileroller mpv sxiv file-roller 
+zathura zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps 
+ranger neovim emacs htop 
+dunst 
+polkit-gnome gnome-keyring 
+media-video/pipewire media-libs/libpulse wireplumber pavucontrol 
+flameshot flatpak firefox 
+libev libevdev bc jq

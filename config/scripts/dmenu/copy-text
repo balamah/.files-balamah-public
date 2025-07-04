@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh
+
+text=$(cat /tmp/.files-balamah/recent/copy-text | sort | uniq | \
+	dmenu -p " Enter text to copy" | rip)
+
+[ -z "$text" ] && exit 1
+
+echo "$text" >> /tmp/.files-balamah/recent/copy-text
+
+~/.config/scripts/notify-send-copy "${0##*/}" \
+	"Text: \"$text\" copied to clipboard" "$text"

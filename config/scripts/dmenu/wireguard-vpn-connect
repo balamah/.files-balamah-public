@@ -1,0 +1,53 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+launchedConnections=$(ip -c a | grep -o "wg.*[0-9]: " | sed 's/:/.conf/g;s/ $//g')
+
+disconnect() {
+	pkexec sudo wg-quick down "$1" && \
+		notify-send "${0##*/}" "Successfully disconnected ${1##*/}" ||
+		notify-send "${0##*/}" "Failed to disconnect ${1##*/}" -u critical
+}
+
+disconnectConnection() {
+	connection=$(echo "$launchedConnections" | \
+					 dmenu -p ' Choose connection to disconnect')
+
+	[ -z "$connection" ] && exit
+
+	disconnect "$vpnWireguardPath/$connection"
+}
+
+disconnectAll() {
+	echo "$launchedConnections" | \
+		while read connection; do
+			disconnect "$vpnWireguardPath/$connection"
+		done
+}
+
+connect() {
+	connection=$(find "$vpnWireguardPath" -type f -name "*.conf" | sed 's@.*/@@g' | \
+			  dmenu -p '󱘖 Choose vpn connection to connect')
+
+	[ -z "$connection" ] && exit
+
+	pkexec sudo wg-quick up "$vpnWireguardPath/$connection" && \
+		notify-send "${0##*/}" "Successfully connected to $connection" ||
+		notify-send "${0##*/}" "Failed to connect to $connection" -u critical
+}
+
+menu() {
+	option=$(printf "connect\ndisconnect\ndisconnect all" | \
+				  dmenu -p '󰖂 Choose vpn option')
+
+	[ -z "$option" ] && exit
+
+	case "$option" in
+		"connect") connect ;;
+		"disconnect") disconnectConnection ;;
+		"disconnect all") disconnectAll    ;;
+	esac
+}
+
+[ -z "$launchedConnections" ] && connect || menu

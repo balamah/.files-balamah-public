@@ -1,0 +1,21 @@
+#!/bin/bash
+
+user=$(cat /tmp/.files-balamah-user)
+dots=/home/$user/.files-balamah
+
+. $dots/install/modules/functions.sh 
+
+[ "$linkSystemFiles" != 'yes' ] && exit
+
+# change username in desktop entries.
+# Sometimes they may have scripts activation
+readyDesktopEntries=$dots/usr/applications/ready
+[ ! -d "$readyDesktopEntries" ] && mkdir $readyDesktopEntries
+
+cp $dots/usr/applications/*.desktop $readyDesktopEntries
+sed -i "s@\$HOME@/home/$user@" $readyDesktopEntries/*
+chown $user:$user $readyDesktopEntries/*
+
+# link
+link $readyDesktopEntries/* /usr/share/applications/
+link $dots/etc/* /etc/

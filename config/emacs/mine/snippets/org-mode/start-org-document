@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: start-org-document
+# key: <o
+# --
+
+#+TITLE: ${1:title}
+#+DESCRIPTION: ${2:description}
+
+$0

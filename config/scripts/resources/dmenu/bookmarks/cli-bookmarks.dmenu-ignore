@@ -1,0 +1,6 @@
+# -*- mode: bookmark -*-
+!INCLUDE: ~/.config/scripts/resources/dmenu/bookmarks/directories
+
+# other
+roaming           /mnt/c/Users/Minec/AppData/Roaming
+dots              ~/.files-balamah

@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: base
+# key: base
+# --
+
+*~*
+*#*
+*.tmp
+*.tmp.*
+*.log
+*.swp
+*.eld
+'
+
+__pycache__/
+node_modules/
+venv/
+
+# dumbass files
+# Instead of storing inside file manager directory options for directory,
+# they desided to put junk in catalogs
+.DS_store
+desktop.ini

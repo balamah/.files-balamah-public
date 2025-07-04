@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Just default dmenu_run but with prompt "Launch command"
+
+dmenu_run -p " Launch command"

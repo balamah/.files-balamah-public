@@ -1,0 +1,25 @@
+xorg xorg-xinit xorg-server numlockx slock
+libx11 libxft libxinerama fontconfig python-pip
+feh lsd imagemagick
+xdg-desktop-portal xdg-desktop-portal-gtk
+lxappearance breeze-icons
+xdotool xclip acpi
+dbus gtk3 gtk4
+nemo nemo-fileroller nemo-image-converter
+mpv sxiv file-roller
+zathura zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps
+ranger neovim emacs htop
+dunst
+screenkey
+xcompmgr
+libconfig
+dunst rofi
+android-file-transfer libmtp android-udev
+adobe-source-han-serif-jp-fonts adobe-source-han-serif-kr-fonts
+adobe-source-han-serif-otc-fonts adobe-source-han-serif-cn-fonts
+adobe-source-han-serif-tw-fonts
+noto-fonts-emoji
+polkit-gnome gnome-keyring
+pipewire pipewire-pulse wireplumber pamixer pavucontrol playerctl
+flameshot flatpak firefox
+libev libevdev jq bc

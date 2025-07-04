@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: start-documentation
+# key: <d
+# --
+
+#+TITLE: ${1:title}
+#+AUTHOR: ${2:author}
+
+* Table of contents :toc:
+
+* Information
+$0

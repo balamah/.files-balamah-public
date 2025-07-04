@@ -1,0 +1,4 @@
+#!/bin/sh
+
+notify-send "${0##*/}" "This will kill all windows"
+decision=$(printf "no\nyes" | dmenu -p "󰈆 Are you sure you want to quit to tty?")

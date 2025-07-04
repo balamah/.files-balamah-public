@@ -1,0 +1,7 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf 
+
+while :; do
+	ping "$connectionTestWebsite"
+done

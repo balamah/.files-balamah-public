@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Launches dmenu with options
+# shutdown, reboot, lock or logout.
+# Then with choice it launches script
+
+action=$(cat ~/.config/scripts/resources/dmenu/powermenu | \
+           dmenu -p " What do you want?" | awk '{print $2}')
+
+[ -z "$action" ] && exit 1
+
+case "$action" in
+	"shutdown"|"reboot") ~/.config/scripts/dmenu/shutdown "$action" ;;
+	"lock") slock ;;
+	"logout") ~/.config/scripts/dmenu/logout ;;
+	*) notify-send "${0##*/}" 'Invalid action' ;;
+esac

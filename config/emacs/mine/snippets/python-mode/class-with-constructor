@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: class with constructor
+# key: class()
+# --
+
+class ${1:Class Name}:
+    def __init__(self, ${2:parameters}):
+        $0

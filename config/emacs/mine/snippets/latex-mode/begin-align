@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: begin-align
+# key: align:::
+# --
+
+\begin{aligned}
+  $0
+\end{aligned}

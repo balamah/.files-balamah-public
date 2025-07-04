@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# The script launches dmenu with bookmark choices
+# image directories, directories, files and links.
+# Then you just need to choose a bookmark to open
+
+. ~/.files-balamah/config/scripts/functions.sh
+. ~/.files-balamah/settings.conf 
+
+bookmarkCategory=$(find $bookmarksPath -type f ! -name "*.dmenu-ignore" | \
+					   sort -k2,2r | sed "s@.*/@@g" | \
+					   dmenu -i -p "󰉺 Choose bookmark category")
+
+bookmarkFile="$bookmarksPath/$bookmarkCategory"
+
+[ ! -f "$bookmarkFile" ] && exit
+
+bookmark=$(br "$bookmarkFile" | dmenu -p "󰃀 Choose bookmark to open" -l 24)
+command=$(cat "$bookmarkFile" | grep "^!COMMAND: " | awk -F ":" '{print $2}' | rip)
+
+[ -z "$bookmark" ] && exit
+[ -z "$command" ] && notify-send "${0##*/}" 'no "!COMMAND:" in bookmark file' && exit 1
+
+eval "$command ${bookmark##*  }"

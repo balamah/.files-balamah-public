@@ -1,0 +1,3604 @@
+#+TITLE: Balamah's emacs config
+#+AUTHOR: Miha Balandin
+
+If you don't like some functional, configure =src/local.el=
+
+* Table of contents :toc:
+- [[#loader][Loader]]
+- [[#functions][Functions]]
+  - [[#get-keybinding-using-prefix][Get keybinding using prefix]]
+  - [[#bind][Bind]]
+  - [[#get-only-file-name][Get only file name]]
+  - [[#read-file][Read file]]
+  - [[#copy-string-to-clipboard][Copy string to clipboard]]
+  - [[#read-conf-variable][Read conf variable]]
+  - [[#macro-execute-depending-on-settingsconf-variables][Macro: execute depending on settings.conf variables]]
+  - [[#macro-execute-depending-on-os][Macro: execute depending on os]]
+  - [[#edit-crontab][Edit crontab]]
+  - [[#remove-prefix-to-first-space][Remove prefix to first space]]
+  - [[#run-function-from-shell-file][Run function from shell file]]
+  - [[#get-org-mode-variable][Get org-mode variable]]
+- [[#standart-settings][Standart settings]]
+  - [[#appearance][Appearance]]
+  - [[#settings][Settings]]
+  - [[#keybindings][Keybindings]]
+  - [[#comfy-keybindings][Comfy keybindings]]
+  - [[#disabling][Disabling]]
+- [[#plugins][Plugins]]
+  - [[#plugin-managers-configuration][Plugin managers configuration]]
+  - [[#evil-mode][Evil mode]]
+  - [[#dependency-plugins][Dependency plugins]]
+  - [[#fuzzy-finding][Fuzzy finding]]
+  - [[#better-help-pages][Better help pages]]
+  - [[#autopairs][Autopairs]]
+  - [[#org-mode][Org mode]]
+  - [[#additional-org-mode-plugins][Additional org mode plugins]]
+  - [[#org-mode-presentations][Org mode presentations]]
+  - [[#rainbow][Rainbow]]
+  - [[#ui-stuff][Ui stuff]]
+  - [[#dashboard][Dashboard]]
+  - [[#keycast][Keycast]]
+  - [[#monkeytype][Monkeytype]]
+  - [[#string-cases-cycle][String cases cycle]]
+  - [[#emacs-everywhere][Emacs everywhere]]
+  - [[#projects][Projects]]
+  - [[#transpose-frame][Transpose frame]]
+  - [[#dired][Dired]]
+  - [[#which-key][Which key]]
+  - [[#python-venv-support][Python venv support]]
+  - [[#drag-stuff][Drag stuff]]
+  - [[#important-major-modes][Important major modes]]
+  - [[#gradle][Gradle]]
+  - [[#holyc-mode][Holyc mode]]
+  - [[#project-todos][Project TODOs]]
+  - [[#yasnippet][Yasnippet]]
+  - [[#magit][Magit]]
+  - [[#docker][Docker]]
+  - [[#lsp-mode][Lsp mode]]
+  - [[#company-mode][Company mode]]
+  - [[#debug][Debug]]
+  - [[#vterm][Vterm]]
+  - [[#nyan-cat-mode][Nyan cat mode]]
+  - [[#sudo-edit][Sudo edit]]
+  - [[#sessions-saving][Sessions saving]]
+  - [[#coding-ligatures][Coding ligatures]]
+- [[#custom-functional][Custom functional]]
+  - [[#git-sync][Git sync]]
+  - [[#project-config][Project config]]
+  - [[#reader-mode][Reader mode]]
+  - [[#open-bookmarks][Open bookmarks]]
+  - [[#bookmark-major-mode][Bookmark major-mode]]
+  - [[#org-mode-discipline][Org-mode discipline]]
+
+* Loader
+:properties:
+:header-args: :tangle ~/.config/emacs/mine/loader.el
+:end:
+
+The file loads emacs config parts. If you want to turn emacs into
+window manager, change =profile= to =exwm= in [[file:~/.files-balamah/settings.conf][settings.conf]]
+
+You can see org-mode config of exwm [[file:~/.config/emacs/mine/window-manager.org][here]]
+#+begin_src elisp
+(dolist (file '("~/.config/emacs/mine/src/functions.el"
+				"~/.config/emacs/mine/src/standart-stuff.el"
+				"~/.config/emacs/mine/src/plugins.el"
+				"~/.config/emacs/mine/src/custom-functional.el"
+				"~/.config/emacs/mine/src/local.el"
+				))
+  (load file))
+
+(with-system '(gnu/linux gnu/kfreebsd)
+  (with-conf-variable "profile" "exwm"
+	(load "~/.config/emacs/mine/src/exwm.el")))
+
+(let ((temporary-configuration "/tmp/.files-balamah/temporary-config.el"))
+  (when (file-exists-p temporary-configuration)
+	(load temporary-configuration)))
+#+end_src
+
+* Functions
+:properties:
+:header-args: :tangle ~/.config/emacs/mine/src/functions.el
+:end:
+
+** Get keybinding using prefix
+#+begin_src elisp
+(defun pkbd (prefix keychord)
+  "Get keybinding using prefix.
+Useful when you make your functional and the functional has its prefix.
+It is not very convenient to always create keybindings with the same prefix like
+(kbd (concat prefix \" \" keychord)).
+It is much better to just use
+(pkbd prefix keychord)
+"
+  (kbd (concat prefix " " keychord)))
+#+end_src
+
+** Bind
+The standart function doesn't look beautiful really for you sometimes
+need to call it many times to bind multiple functions
+
+#+begin_src elisp
+(defun global-bind (keybindings-alist &optional prefix)
+  "Bind commands to keybindings sometimes using prefix.
+Usage is here:
+(global-bind '(
+    (\"C-c j f\" . function-call)
+    (\"C-c j o\" . otherfunction-call)))
+
+If you want to create prefix keybindings, you need to set prefix to
+some prefix, like C-c S, which will look like
+(global-bind '(
+    (\"f\" . function-call)
+    (\"o\" . otherfunction-call)) \"C-c j\")
+"
+
+  (dolist (alist keybindings-alist)
+	(if prefix
+		(global-set-key (pkbd prefix (car alist)) (cdr alist))
+	  (global-set-key (kbd (car alist)) (cdr alist)))))
+
+(defun map-bind (keybindings-alist keymap &optional prefix)
+  "Bind commands to keybindings for keymap sometimes using prefix.
+Usage is here:
+(map-bind '((\"C-c j f\" . function-call)
+            (\"C-c j o\" . otherfunction-call)) php-mode-map)
+
+If you want to create prefix keybindings, you need to set prefix to
+some prefix, like C-c S, which will look like
+(map-bind '((\"f\" . function-call)
+            (\"o\" . otherfunction-call)) php-mode-map \"C-c j\")
+"
+
+  (dolist (alist keybindings-alist)
+	(if prefix
+		(define-key keymap (pkbd prefix (car alist)) (cdr alist))
+	  (define-key keymap (kbd (car alist)) (cdr alist)))))
+#+end_src
+
+** Get only file name
+It needs parameter: =buffer-file-name=
+
+#+begin_src elisp
+(defun get-only-file-name (file-path)
+  "file-path can be buffer-file-name"
+  (interactive)
+  (file-name-nondirectory file-path))
+#+end_src
+
+** Read file
+#+begin_src elisp
+(defun read-file (filename)
+  "Return string that is readen from FILENAME"
+  (with-temp-buffer
+	(insert-file-contents filename)
+	(buffer-string)))
+#+end_src
+
+** Copy string to clipboard
+#+begin_src elisp
+(defun copy-string-to-clipboard (string)
+  "Copy string to the clipboard"
+  (when string
+    (kill-new string)
+    (message "Copied to clipboard: %s" string)))
+#+end_src
+
+** Read conf variable
+#+begin_src elisp
+(defun read-conf-variable (file variable-name)
+  "Read the value of VARIABLE-NAME from FILE with format key=value"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (let ((regex (format "^%s[ \t]*=[ \t]*\\(.*\\)$" (regexp-quote variable-name)))
+          value)
+      (while (re-search-forward regex nil t)
+        (setq value (string-trim (match-string 1))))
+      value)))
+#+end_src
+
+** Macro: execute depending on settings.conf variables
+#+begin_src elisp
+(defmacro with-conf-variable (variable value &rest body)
+  "Execute depending on variable which should be equal to value.
+Usage:
+(with-conf-variable \"profile\" \"no-wm\"
+  (set-frame-parameter nil 'alpha-background 93))"
+
+  (declare (indent defun))
+  `(when (equal
+		  (read-conf-variable "~/.files-balamah/settings.conf" ,variable) ,value)
+	 ,@body))
+
+(defmacro unless-conf-variable (variable value &rest body)
+  "Execute depending on variable which should NOT be equal to value.
+Usage:
+(unless-conf-variable \"profile\" \"no-wm\"
+  (set-frame-parameter nil 'alpha-background 93))"
+
+  (declare (indent defun))
+  `(unless (equal
+		  (read-conf-variable "~/.files-balamah/settings.conf" ,variable) ,value)
+	 ,@body))
+
+(defmacro if-conf-variable (variable value then else)
+  "Execute depending on variable. If condition is t, then it will
+execute first code block, otherwise it will execute second.
+Just like 'if' in elisp"
+
+  (declare (indent defun))
+  `(if (equal
+		(read-conf-variable "~/.files-balamah/settings.conf" ,variable) ,value)
+	   ,then
+	 ,else))
+#+end_src
+
+** Macro: execute depending on os
+#+begin_src elisp
+(defmacro with-system (types &rest body)
+  "Execute code if system-type is one of systems in list.
+It should look like
+(with-system '(gnu/kfreebsd gnu/linux)
+  (some-code-here))
+"
+  (declare (indent defun))
+  `(when (member system-type ,types)
+     ,@body))
+
+(defmacro with-not-system (types &rest body)
+  "Execute code if system-type is not from types list.
+It should look like
+(with-not-system '(darwin windows-nt)
+  (some-code-here)
+  (it-wont-execute-on-darwin-and-windows-nt))
+"
+  (declare (indent defun))
+  `(when (not (member system-type ,types))
+     ,@body))
+#+end_src
+
+** Edit crontab
+#+begin_src elisp
+(defun crontab-edit ()
+  "Open crontab -e in emacs buffer"
+  (interactive)
+  (with-editor-async-shell-command "crontab -e"))
+#+end_src
+
+** Remove prefix to first space
+#+begin_src elisp
+(defun remove-prefix-to-first-space (str)
+  "Remove everything before and including the first space in the string"
+  (replace-regexp-in-string "^.*?\\s-+" "" str))
+#+end_src
+
+** Run function from shell file
+#+begin_src elisp
+(defun source-shell-script-run-command (shell-config-file command)
+  "Source the shell script and run the command in the same shell process"
+  (let ((script (concat "source " shell-config-file " && " command)))
+    (shell-command-to-string script)))
+#+end_src
+
+** Get org-mode variable
+#+begin_src elisp
+(defun org-get-keyword-variable-value (key)
+  "Get value from org-mode header"
+  (let ((parsed (org-element-parse-buffer)))
+    (org-element-map parsed 'keyword
+      (lambda (el)
+        (when (string-equal (org-element-property :key el) key)
+          (org-element-property :value el)))
+      nil t)))
+#+end_src
+
+* Standart settings
+:properties:
+:header-args: :tangle ~/.config/emacs/mine/src/standart-stuff.el
+:end:
+
+Here is configuration for default stuff
+
+** Appearance
+*** Set tranparency
+#+begin_src elisp
+(with-system '(gnu/kfreebsd gnu/linux)
+  (unless-conf-variable "colorscheme" "pywal"
+	(set-frame-parameter nil 'alpha-background 100)
+	(add-to-list 'default-frame-alist '(alpha-background . 100)))
+
+  (with-conf-variable "colorscheme" "pywal"
+	(set-frame-parameter nil 'alpha-background 93)
+	(add-to-list 'default-frame-alist '(alpha-background . 93))))
+#+end_src
+
+*** Change font
+#+begin_src elisp
+(defvar emacs-font-free "JetBrains Mono NFM-13"
+  "Emacs font on free systems")
+
+(defvar emacs-font-nt "JetBrainsMono NF-13"
+  "Emacs font on nt systems")
+
+(with-system '(gnu/kfreebsd gnu/linux)
+  (add-to-list 'default-frame-alist `(font . ,emacs-font-free)))
+
+(with-system '(windows-nt)
+  (add-to-list 'default-frame-alist `(font . ,emacs-font-nt)))
+#+end_src
+
+** Settings
+*** Configure tabs
+Tabwidth is 4 spaces. Looks beautiful
+#+begin_src elisp
+(setq-default tab-width 4)
+#+end_src
+
+*** Change window title
+If system is gnu/linux or gnu/kfreebsd, and profile is not no-wm, it
+will look like " file name - GNU emacs". But if os is different that
+these, the title will look like "* file name - GNU emacs"
+#+begin_src elisp
+(with-system '(gnu/linux gnu/kfreebsd)
+  (unless-conf-variable "profile" "no-wm"
+	(setq frame-title-format
+		  '((:eval (if (buffer-modified-p) " "))
+			(:eval (if (buffer-file-name)
+					   (abbreviate-file-name (buffer-file-name)) "%b"))
+			" - GNU emacs"))))
+
+(with-system '(windows-nt darwin haiku cygwin)
+  (setq frame-title-format
+		'((:eval (if (buffer-modified-p) "* "))
+		  (:eval (if (buffer-file-name)
+					 (abbreviate-file-name (buffer-file-name)) "%b"))
+		  " - GNU emacs")))
+#+end_src
+
+*** Enable line numbers
+Set to visual because relative line numbers suck in emacs with
+org-mode. When you fold headlines, it will show relative number
+from this line to folded, which sucks. Now it shows only visually
+
+#+begin_src elisp
+(setq display-line-numbers-type 'visual
+	  display-line-numbers-current-absolute t
+	  display-line-numbers-width 4 
+	  display-line-numbers-widen t)
+
+(global-display-line-numbers-mode) 
+#+end_src
+
+*** Scratch buffer
+It changes mode to org-mode and it changes inital message
+#+begin_src elisp
+(setq initial-major-mode 'org-mode
+      initial-scratch-message "#+TITLE: Scratch buffer
+,#+LATEX_HEADER: \\usepackage[english,ukrainian]{babel}
+,#+LATEX_HEADER: \\usepackage{mhchem}
+
+")
+#+end_src
+
+*** Change backup directory
+*~ files in directory look ugly
+
+#+begin_src elisp
+(setq backup-directory-alist '((".*" . "~/.config/emacs/mine/backups")))
+#+end_src
+
+*** Kill buffer without asking
+It's annoying when i want to kill vterm
+
+#+begin_src elisp
+(setq kill-buffer-query-functions nil)
+#+end_src
+
+*** ERC
+ERC is a powerful, modular, and extensible Internet Relay Chat client
+
+#+begin_src elisp
+(setq erc-join-buffer 'buffer)
+
+(global-set-key (kbd "C-c e") 'erc-tls)
+#+end_src
+
+*** Delete dumbass warnings
+Sometimes warnings can be really annoying, therefore it is better to
+disable them. They can be disabled by setting to =no= =$emacsEnableWarnings=
+
+#+begin_src elisp
+(with-conf-variable "emacsEnableWarnings" "no"
+  (setq warning-minimum-level :error))
+#+end_src
+
+*** Change encoding to utf-8
+#+begin_src elisp
+(setq org-export-coding-system 'utf-8
+	  coding-system-for-read 'utf-8-unix
+	  coding-system-for-write 'utf-8-unix)
+#+end_src
+
+*** Show column number on modeline
+#+begin_src elisp
+(setq column-number-mode t)
+#+end_src
+
+*** Enable which key tips
+The 'which-key' package from GNU ELPA is now included in Emacs.  It
+implements the global minor mode 'which-key-mode' that displays a
+table of key bindings upon entering a partial key chord and waiting
+for a moment.  For example, after enabling the minor mode, if you
+enter 'C-x' and wait for one second, the minibuffer will expand with
+all available key bindings that follow 'C-x' (or as many as space
+allows).
+
+#+begin_src elisp
+(with-conf-variable "emacsEnableOldVersionConfig" "no"
+  (which-key-mode))
+#+end_src
+
+** Keybindings
+*** Toggle strings hyphenation
+Without hyphenation reading bible in org-mode is painful
+
+#+begin_src elisp
+(defun truncate-lines-hook ()
+  (setq truncate-lines nil))
+
+;; (add-hook 'org-mode-hook #'truncate-lines-hook)
+
+(defun truncate-lines-toggle ()
+  (interactive)
+  (setq-local truncate-lines (not truncate-lines))
+  (message "truncate-lines has changed to %s" truncate-lines))
+
+(global-set-key (kbd "C-c h") 'truncate-lines-toggle)
+#+end_src
+
+*** Change transparency on fly
+#+begin_src elisp
+(defun change-transparency (level)
+  "Prompt for a transparency level and apply it to all frames"
+  (interactive
+   (list
+    (string-to-number (read-string "Enter transparency level (0 - 100) >>> ")))
+   )
+  (dolist (frame (frame-list))
+    (set-frame-parameter frame 'alpha-background level))
+  (setq default-frame-alist (assq-delete-all 'alpha-background default-frame-alist))
+  (add-to-list 'default-frame-alist (cons 'alpha-background level)))
+
+(global-set-key (kbd "C-c g") 'change-transparency)
+#+end_src
+
+*** Window resize
+It's very annoying to touch the mouse, it's cooler to use only keyboard
+
+**** Define resize functions
+Standart function for resizing windows suck, for they do it very slow
+
+#+begin_src elisp
+(defun improved-enlarge-window-horizontally ()
+  (interactive)
+  (enlarge-window-horizontally 5))
+
+(defun improved-shrink-window-horizontally ()
+  (interactive)
+  (shrink-window-horizontally 5))
+
+(defun improved-enlarge-window ()
+  (interactive)
+  (enlarge-window 3))
+
+(defun improved-shrink-window ()
+  (interactive)
+  (shrink-window 3))
+#+end_src
+
+**** Functions binding
+#+begin_src elisp
+(global-bind '(("C-&" . improved-enlarge-window-horizontally)
+			   ("C-*" . improved-shrink-window-horizontally)
+			   ("C-M-&" . improved-shrink-window)
+			   ("C-M-*" . improved-enlarge-window)))
+#+end_src
+
+*** Close window and kill buffer
+Very useful for vterm when you run the file
+
+#+begin_src elisp
+(defun kill-buffer-close-window ()
+  (interactive)
+  (kill-buffer)
+  (delete-window))
+
+(global-set-key (kbd "C-x c") 'kill-buffer-close-window)
+#+end_src
+
+*** Package manager
+It's not very comfortable to always press =M-x= and run command with
+^package. It looks much cooler to install package using keybindings
+
+#+begin_src elisp
+(global-bind '(("i" . package-install)
+			   ("d" . package-delete)
+			   ("l" . package-list-packages)) "C-c P")
+#+end_src
+
+*** Toggle line numbers
+#+begin_src elisp
+(global-set-key (kbd "C-S-n") 'display-line-numbers-mode)
+#+end_src
+
+*** Eval buffer
+#+begin_src elisp
+(global-set-key (kbd "C-c C-<return>") 'eval-buffer)
+#+end_src
+
+*** Restart emacs
+I'm annoyed to always run =M-x= *restart-emacs*
+
+#+begin_src elisp
+(defun restart-emacs-ask ()
+  (interactive)
+  (when (y-or-n-p "Are you sure to restart emacs?")
+	(restart-emacs)))
+
+(global-set-key (kbd "C-c R") 'restart-emacs-ask)
+#+end_src
+
+*** Make directory
+I want to use cool method to create directories
+
+#+begin_src elisp
+(global-set-key (kbd "C-c m m") 'make-directory)
+#+end_src
+
+Create directory and cd
+#+begin_src elisp
+(defun make-directory-dired (directory)
+  "Make directory DIRECTORY and open in dired"
+  (interactive
+   (list (read-file-name "Make directory and open in dired: "
+						 default-directory default-directory nil nil)))
+  (make-directory directory)
+  (dired directory))
+
+(global-set-key (kbd "C-c m d") 'make-directory-dired)
+#+end_src
+
+*** Toggle line truncate
+#+begin_src elisp
+(defun truncate-toggle ()
+  (interactive)
+  (setq truncate-lines (not truncate-lines)))
+
+(global-set-key (kbd "C-c q") 'truncate-toggle)
+#+end_src
+
+*** Scroll using keybindings
+={}= are like =jk= in vim motions
+
+| Key | Direction | Analog in vim motions |
+|-----+-----------+-----------------------|
+| {   | down      | j                     |
+| }   | up        | k                     |
+
+#+begin_src elisp
+(defun scroll-up-like-mwheel ()
+  (interactive)
+  (scroll-down-command 1))
+
+(defun scroll-down-like-mwheel ()
+  (interactive)
+  (scroll-up-command 1))
+
+(global-bind '(("C-M-}" . scroll-up-like-mwheel)
+			   ("C-M-{" . scroll-down-like-mwheel)))
+#+end_src
+
+*** Reload emacs config
+#+begin_src elisp
+(defun emacs-reload-config ()
+  "Load config from ~/.config/emacs/mine/init.el"
+  (interactive)
+  (load-file "~/.config/emacs/mine/init.el"))
+
+(global-set-key (kbd "C-x R") 'emacs-reload-config)
+#+end_src
+
+*** Increase LaTeX preview scale
+#+begin_src elisp
+(defun org-latex-preview-scale-change (scale)
+  "Change scale of LaTeX previews"
+  (interactive
+   (list
+	(read-number "Pick LaTeX preview scale (1.5 is normal) >>> ")))
+  (setq org-format-latex-options
+		(plist-put org-format-latex-options :scale scale))
+  (message "LaTeX preview scale was changed to %s" scale))
+
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c C-x S") 'org-latex-preview-scale-change))
+#+end_src
+
+*** Align regexp
+#+begin_src elisp
+(global-set-key (kbd "C-c a") 'align-regexp)
+#+end_src
+
+** Comfy keybindings
+Standart emacs keybindings very painful and slow. It's better
+to not unhold ctrl
+
+*** Window control
+#+begin_src elisp
+(global-bind '(("C-4 C-f" . find-file-other-window)
+			   ("C-1" . delete-other-windows)
+			   ("C-o" . other-window)) "C-x")
+#+end_src
+
+*** C-x o backward
+#+begin_src elisp
+(defun other-window-backward ()
+  (interactive)
+  (other-window -1))
+
+(global-set-key (kbd "C-x C-S-o") 'other-window-backward)
+#+end_src
+
+*** Open scratch buffer
+#+begin_src elisp
+(global-set-key (kbd "C-c s") 'scratch-buffer)
+#+end_src
+
+*** Find text in project
+#+begin_src elisp
+(global-set-key (kbd "C-S-F") 'find-grep-dired)
+#+end_src
+
+*** Split keybindings
+Split and switch window
+#+begin_src elisp
+(defun split-below-switch-window (&optional no-redisplay)
+  (interactive)
+  (split-window-below)
+
+  (unless no-redisplay
+	(redisplay))
+
+  (other-window 1))
+
+(defun split-right-switch-window (&optional no-redisplay)
+  (interactive)
+  (split-window-right)
+
+  (unless no-redisplay
+	(redisplay))
+
+  (other-window 1))
+
+(global-bind '(("C-2" . split-below-switch-window)
+			   ("C-3" . split-right-switch-window)) "C-x")
+#+end_src
+
+Split and run M-x
+#+begin_src elisp
+(defun mx ()
+  (interactive)
+  (call-interactively 'execute-extended-command))
+
+(defun split-below-mx ()
+  (interactive)
+  (split-below-switch-window)
+  (mx))
+
+(defun split-right-mx ()
+  (interactive)
+  (split-right-switch-window)
+  (mx))
+
+(global-bind '(("C-#" . split-right-mx)
+			   ("#"   . split-right-mx)
+			   ("C-@" . split-below-mx)
+			   ("@"   . split-below-mx)) "C-x")
+#+end_src
+
+List buffers and switch window
+#+begin_src elisp
+(defun list-buffers-other-window ()
+  (interactive)
+  (list-buffers)
+  (other-window 1))
+
+(global-set-key (kbd "C-x C-b") 'list-buffers-other-window)
+#+end_src
+
+*** Copy buffer name
+#+begin_src elisp
+(defun copy-buffer-name ()
+  (interactive)
+  (kill-new buffer-file-name)
+  (message "`%s' copied to clipboard" (buffer-file-name)))
+
+(global-set-key (kbd "C-c {") 'copy-buffer-name)
+#+end_src
+
+*** Tabs
+Default tab keybindings suck, therefore it is better to make them more
+intuitive. Prefix is =C-x T=
+
+#+begin_src elisp
+(global-bind '(("n" . tab-new)
+			   ("c" . tab-close)
+			   ("C" . tab-close-other)
+			   ("b" . switch-to-buffer-other-tab)
+			   ("f" . find-file-other-tab)
+			   ("d" . dired-other-tab)
+			   ("s" . tab-switch)
+			   ("r" . tab-rename)
+			   ("o" . other-tab-prefix)) "C-x T")
+#+end_src
+
+** Disabling
+*** Ui elements
+I just don't need them, because i use keybindings
+#+begin_src elisp
+(unless-conf-variable "profile" "macos"
+  (menu-bar-mode -1)
+  )
+
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+#+end_src
+
+*** Prompt for following link
+All the time it asks to open file that is link, which sucks
+#+begin_src elisp
+(setq vc-follow-symlinks t)
+#+end_src
+
+*** Keybindings for freezing
+Unbind keybindings for freezing. I just don't know how to unfreeze, i
+searched for it i didn't find anything(((
+#+begin_src elisp
+(dolist (keybinding '("C-z" "C-x C-z"))
+  (global-unset-key (kbd keybinding)))
+#+end_src
+
+*** Tetris
+I got addicted to tetris, and i may be distracted with it a lot,
+therefore i need to disable for a bit
+
+#+begin_src elisp
+(with-conf-variable "emacsEnableTetris" "no"
+  (defun tetris ()
+	"Print message to not play tetris"
+	(interactive)
+	(message "Don't play in it now. Read the Bible or study something")))
+#+end_src
+
+* Plugins
+:properties:
+:header-args: :tangle ~/.config/emacs/mine/src/plugins.el
+:end:
+
+** Plugin managers configuration
+*** Configure package archives
+Without it, all my configuration won't work
+
+#+begin_src elisp
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+						 ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+						 ("elpa" . "https://elpa.gnu.org/packages/") 
+						 ("melpa" . "https://melpa.org/packages/")))
+#+end_src
+
+*** Setup package manager
+#+begin_src elisp
+(require 'package)
+(package-initialize)
+#+end_src
+
+*** Bootstrap straight-use-package
+Unfortunately, some packages are now dogshit and you can't
+easily downgrade them. Therefore, i created some repos with
+older versions and idk how to upload to melpa
+
+#+begin_src elisp
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+
+** Evil mode
+The plugin allows to use vim motions inside emacs. I didn't really
+like default keybindings and i missed =di=, =ci=, =da=, =ca= and many other
+motions
+
+*** Main evil-mode config
+The leader is binded to =;=.
+#+begin_src elisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (evil-set-leader 'normal (kbd ";"))
+  (evil-set-undo-system 'undo-redo)
+
+  ;; insert mode
+  (map-bind '(("\C-a" . evil-first-non-blank)
+			  ("\C-e" . end-of-line)
+			  ("\C-n" . next-line)
+			  ("\C-p" . previous-line)) evil-insert-state-map)
+
+  ;; visual mode
+  (map-bind '(
+			  ("\C-e" . end-of-line)
+			  ) evil-visual-state-map)
+
+  ;; normal mode
+  (map-bind '(("\C-a"        . evil-first-non-blank)
+			  ("\C-e"        . end-of-line)
+			  ("gcc"         . comment-line)
+			  ("gr"          . revert-buffer)
+			  ("<leader>SPC" . counsel-dired)
+			  ("<leader>w"   . split-right-switch-window)
+			  ("<leader>W"   . split-below-switch-window)
+			  ("<leader>of"  . counsel-find-file)
+			  ("<leader>or"  . counsel-recentf)
+			  ("<leader>xw"  . delete-other-windows)
+			  ("<leader>xc"  . delete-window)
+			  ("<leader>xC"  . kill-buffer-close-window)
+			  ("<leader>Bb"  . counsel-evil-marks)
+			  ("<leader>Ba"  . bookmark-set)
+			  ("<leader>Bj"  . counsel-bookmark)
+			  ("<leader>Bl"  . bookmark-bmenu-list)
+			  ("<leader>Bd"  . bookmark-delete)
+			  ("<leader>Br"  . bookmark-rename)
+			  ("<leader>Bs"  . bookmark-save)
+			  ("<leader>bb"  . switch-to-buffer)
+			  ("<leader>bo"  . switch-to-buffer-other-window)
+			  ("<leader>k"   . kill-buffer)
+			  ("<leader>s"   . swiper)
+			  ("<leader>;"   . evil-window-next)
+			  ("<leader>:"   . other-window-backward)) evil-normal-state-map))
+#+end_src
+
+*** Macroses
+To save macro, you need
+1) In a buffer, do =q= *f* something here =q=. This will save a macro into
+   the *f* register that inserts foobar into the buffer
+2) Now run =M-x= name-last-kbd-macro =RET= macro-name =RET=
+3) Go to this header and do =M-x= insert-kbd-macro =RET= mymacro =RET=
+
+**** Format long string
+When i copy some text from my school books, it is annoying to press
+5J:s/- //ggqq, it is better to just press "5J =@f="
+
+#+begin_src elisp
+(defalias 'org-format-long-string
+  (kmacro ": s / [-|­] SPC / / g <return> : s / ­ / / g <return> g q q")
+  "Delete all '- ' and press gqq")
+
+(evil-set-register ?f 'org-format-long-string)
+#+end_src
+
+**** Write numbers list
+Create lists like that using only "5 =@n="
+#+begin_example
+1) [ ]
+2) [ ]
+3) [ ]
+4) [ ]
+5) [ ]
+#+end_example
+
+#+begin_src elisp
+(defalias 'write-numbers-list
+  (kmacro "y y p C-=")
+  "Copy line and multiple first number that appears")
+
+(evil-set-register ?n 'write-numbers-list)
+#+end_src
+
+**** Auto link
+Make all text until end a link to header. Useful to link tasks in
+org-mode
+
+#+begin_src elisp
+(defalias 'org-auto-link
+  (kmacro "y $ v $ h C-c C-l C-y <return> <return>")
+  "Link from point to end to header in current org document")
+
+(evil-set-register ?l 'org-auto-link)
+#+end_src
+
+**** Auto link to other file
+Not really a macro, but very useful thing
+
+#+begin_src elisp
+(defun org-auto-link-ask-file (filename)
+  "Ask for file to link in and use everything from point to end as header name"
+  (interactive "FChoose file to link: ")
+  (let ((header-name (buffer-substring (point) (line-end-position))))
+    (kill-region (point) (line-end-position))
+    (org-insert-link nil
+					 (format "file:%s::%s" filename header-name) header-name)))
+
+(with-eval-after-load 'org
+  (dolist (keybinding '("C-c u u" "M-o l"))
+	(define-key org-mode-map (kbd keybinding) 'org-auto-link-ask-file)))
+#+end_src
+
+**** Move DEADLINE after SCHEDULED
+#+begin_src elisp
+(defalias 'org-move-scheduled-deadline
+  (kmacro "d f > A SPC <escape> p 0 x")
+  "Move '.*>' to the end")
+
+(evil-set-register ?m 'org-move-scheduled-deadline)
+#+end_src
+
+**** Check and go down
+#+begin_src elisp
+(defalias 'check-fold-go-down
+  (kmacro "C-S-c <tab> C-M-SPC")
+  "Check the checkbox, fold and go down to the next")
+
+(defalias 'check-go-down
+  (kmacro "C-S-c C-M-SPC")
+  "Check the checkbox and go down to the next")
+
+(evil-set-register ?c 'check-fold-go-down)
+(evil-set-register ?x 'check-go-down)
+#+end_src
+
+*** Additional evil-mode plugins
+Evil mode for other plugins
+#+begin_src elisp
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
+#+end_src
+
+Increment and decrement
+#+begin_src elisp
+(use-package evil-numbers
+  :ensure t
+  :bind (:map evil-normal-state-map
+			  ("C--" . evil-numbers/dec-at-pt)
+			  ("C-=" . evil-numbers/inc-at-pt)))
+#+end_src
+
+** Dependency plugins
+Sometimes some plugins may not work without some plugins
+
+*** Nerd icons
+Here are nerd icons plugins. They are dependencies for
+some plugins such as doom-modeline and treemacs
+
+#+begin_src elisp
+(use-package nerd-icons
+  :ensure t
+  :init (require 'nerd-icons nil t)
+  :bind (:map global-map
+			  ("C-c n" . nerd-icons-insert)))
+
+(use-package nerd-icons-dired
+  :ensure t
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package all-the-icons
+  :ensure t
+  :init (require 'all-the-icons))
+#+end_src
+
+*** Flycheck
+org-babel python evaluation doesn't work without this plugin
+
+#+begin_src elisp
+(use-package flycheck
+  :ensure t
+  :hook ((org-mode . flycheck-mode)
+		 (prog-mode . (lambda () (flycheck-mode -1)))))
+#+end_src
+
+** Fuzzy finding
+It's just based and comfy to use
+
+#+begin_src elisp
+(use-package ivy
+  :ensure t
+  :init
+  (ivy-mode)
+  :config
+  (setq ivy-use-virtual-buffers t
+        ivy-count-format "(%d/%d) "
+		ivy-initial-inputs-alist nil
+        enable-recursive-minibuffers t))
+
+(use-package counsel
+  :ensure t
+  :bind
+  ("C-c k t" . counsel-load-theme)
+  ("C-c l i" . counsel-imenu)
+  )
+
+(use-package nerd-icons-ivy-rich
+  :after ivy
+  :ensure t
+  :init
+  (nerd-icons-ivy-rich-mode 1)
+  (ivy-rich-mode 1))
+#+end_src
+
+** Better help pages
+Helpful is an alternative to the built-in emacs help that provides
+much more contextual information.
+
+#+begin_src elisp
+(use-package helpful
+  :ensure t
+  :init
+  (setq counsel-describe-function-function #'helpful-callable
+		counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . helpful-key))
+#+end_src
+
+** Autopairs
+*** Posthandler actions
+The plugin doesn't indent out of the box, and i don't like when basic
+things are not present
+
+#+begin_src elisp
+(defun indent-between-pair (&rest _ignored)
+  "smartparens posthandler hook.
+Create indent after pressing RET inside pair symbols"
+  (newline)
+  (indent-according-to-mode)
+  (forward-line -1)
+  (indent-according-to-mode))
+
+(defun space-between-pair (&rest _ignored)
+  "smartparens posthandler hook.
+Create space after pressing SPC inside pair symbols and go backwards"
+  (insert " ")
+  (backward-char))
+#+end_src
+
+*** Main smartparens config
+#+begin_src elisp
+(use-package smartparens
+  :ensure t
+  :hook (prog-mode text-mode markdown-mode org-mode conf-unix-mode sxhkdrc-mode)
+  :config
+  (require 'smartparens-config)
+  (setq smartparens-posthandlers '((indent-between-pair "RET")
+								   (space-between-pair "SPC"))
+		smartparens-posthandler-call-symbols '("{" "[" "(")
+		smartparens-strict-mode nil)
+
+  (sp-local-pair 'org-mode "~" nil :actions nil)
+  (sp-local-pair 'org-mode "=" "=" :wrap "C-+")
+  (sp-local-pair 'org-mode "*" "*" :wrap "C-_")
+  (sp-local-pair 'org-mode "$" "$" :wrap "C-M-$")
+
+  (dolist (symbol smartparens-posthandler-call-symbols)
+	(sp-pair symbol nil :post-handlers smartparens-posthandlers)))
+#+end_src
+
+*** Disable posthandlers when running some commands
+It is very annoying when you run `norm I- [ ]` and it gives extra
+space between [ ]
+
+#+begin_src elisp
+(defun disable-smartparens-during-norm (orig-fun &rest args)
+  "Disable Smartparens features during :norm command execution."
+  (let ((sp-post-handlers nil)                ;; Disable posthandlers
+        (sp-autoinsert-pair nil)              ;; Disable auto-pairing
+        (sp-autoinsert-space nil)             ;; Disable auto space insertion
+        (sp-pair-overlay-keymap nil)          ;; Disable overlays
+        (sp-pair-overlay-list nil))           ;; Disable overlay list
+    (apply orig-fun args)))                   ;; Run the original :norm
+
+(advice-add 'evil-ex-normal :around #'disable-smartparens-during-norm)
+#+end_src
+
+** Org mode
+*** Define useful functions
+Insert functions can be useful for writing hw lists
+#+begin_src elisp
+(defun insert-header-counter ()
+  (interactive)
+  (end-of-line)
+  (insert " [/] [%]")
+  (org-ctrl-c-ctrl-c))
+
+(defun insert-counter ()
+  (interactive)
+  (end-of-line)
+  (insert " [/]")
+  (org-ctrl-c-ctrl-c))
+
+(defun insert-time ()
+  (interactive)
+  (insert (shell-command-to-string "date +%H:%M"))
+  (evil-insert 1))
+
+(defun insert-date ()
+  (interactive)
+  (insert (shell-command-to-string "date +%d.%m.%Y"))
+  (evil-insert 1))
+
+(defun create-header-insert-time ()
+  (interactive)
+  (org-insert-heading-after-current)
+  (insert-time))
+
+(defun create-header-insert-date ()
+  (interactive)
+  (org-insert-heading-after-current)
+  (insert-date))
+#+end_src
+
+Open org-agenda and close other windows. It's useful when you want to
+see agenda by pressing hotkey
+#+begin_src elisp
+(defun org-agenda-delete-windows ()
+  (interactive)
+  (org-agenda)
+  (delete-other-windows))
+#+end_src
+
+*** Create prettify alist
+Make emacs render symbols instead of symbol combinations
+#+begin_src elisp
+(defun load-prettify-symbols ()
+  (interactive)
+  (setq prettify-symbols-alist
+		'(
+		  ("#+begin_src"     . ?)
+		  ("#+BEGIN_SRC"     . ?)
+		  ("#+end_src"       . ?)
+		  ("#+END_SRC"       . ?)
+		  ("#+begin_example" . ?)
+		  ("#+BEGIN_EXAMPLE" . ?)
+		  ("#+end_example"   . ?)
+		  ("#+END_EXAMPLE"   . ?)
+		  ("#+begin_quote"   . ?)
+		  ("#+BEGIN_QUOTE"   . ?)
+		  ("#+end_quote"     . ?)
+		  ("#+END_QUOTE"     . ?)
+		  ("lambda"          . ?λ)
+		  ))
+  (prettify-symbols-mode 1))
+
+(add-hook 'org-mode-hook 'load-prettify-symbols)
+#+end_src
+
+*** Fix some dogshit with evil and org mode
+#+begin_src elisp
+(defun disable-evil-autoindent ()
+  (setq evil-auto-indent nil))
+
+(add-hook 'org-mode-hook #'disable-evil-autoindent)
+#+end_src
+
+*** Config functions
+Org-mode config is enormous without making it shorter using functions
+
+Change header sizes. It makes document much more beautiful
+#+begin_src elisp
+(defun org-mode-configure-faces ()
+  (with-eval-after-load 'org-faces
+	  (dolist (face '((org-level-1 . 1.3)
+					  (org-level-2 . 1.2)
+					  (org-level-3 . 1.05)
+					  (org-level-4 . 1.02)
+					  (org-level-5 . 1.02)
+					  (org-level-6 . 1.02)
+					  (org-level-7 . 1.02)
+					  (org-level-8 . 1.02)))
+	  (set-face-attribute (car face) nil
+						  :font "JetBrainsMono NFM Bold" :height (cdr face)))))
+#+end_src
+
+Change variables. The biggest org-mode config part. Here it adds
+- metrics
+- org agenda commands
+- TODO keywords
+- tags
+#+begin_src elisp
+(defun org-create-metric (type key title file columns &rest parameters)
+  "Create an org-capture template entry for metrics"
+  `(,key ,title ,type (file ,file) ,columns ,@parameters))
+
+(defun org-mode-change-variables ()
+  (setq-default org-display-custom-times t)
+  (setq org-log-done 'time
+		org-export-with-broken-links t
+		org-hide-emphasis-markers t
+		org-time-stamp-custom-formats '("<%d.%m.%Y %a>" . "<%d.%m.%Y %H:%M %a>")
+		org-format-latex-options (plist-put org-format-latex-options :scale 1.5)
+		org-agenda-span 10
+		org-agenda-start-on-weekday nil
+		org-startup-with-inline-images t
+		org-startup-indented t
+		org-startup-folded t
+		org-agenda-skip-scheduled-if-done t
+		org-priority-highest ?A
+		org-plantuml-jar-path "/usr/share/java/plantuml/plantuml.jar"
+		org-priority-default ?B
+		org-priority-lowest  ?C
+		org-latex-create-formula-image-program 'dvipng
+		org-image-actual-width nil
+		org-ellipsis " "
+		org-agenda-include-diary t
+		org-list-allow-alphabetical t
+		org-src-preserve-indentation 0)
+
+  (setq org-capture-templates
+      (list
+       '("m" "Metrics")
+	   (org-create-metric 'table-line "mp" "Head pain" "~/Org/metrics/pain.org"
+                          "| %U | %^{length} | %^{strength} | %^{in nose?} |"
+                          :kill-buffer t)
+
+	   (org-create-metric 'table-line "mt" "Body temperature"
+						  "~/Org/metrics/body-temperature.org"
+                          "| %U | %^{body temperature} | %^{how do you feel} |"
+                          :kill-buffer t)
+
+	   (org-create-metric 'table-line "mw" "Body weight" "~/Org/metrics/weight.org"
+						  "| %U | %^{weight} | %^{is fat?} |"
+                          :kill-buffer t)
+
+	   (org-create-metric 'table-line "mb" "Blood leak" "~/Org/metrics/blood-leak.org"
+                          "| %U | %^{duration (seconds)} | %^{something special?} |"
+                          :kill-buffer t)
+
+	   (org-create-metric
+		'table-line "mD" "Dark urge"
+		"~/Org/metrics/dark-urge.org"
+		"| %U | %^{thought} | %^{person that was harmed} | %^{event before} | %^{strength} | %^{comments}"
+		:kill-buffer t)
+
+	   (org-create-metric 'entry "md" "Diary" "~/Org/metrics/thoughts.org"
+						  "\n* %^{Thought title}\n%U\n%?\n"
+						  :clock-in t :clock-resume t :prepend t)
+	   ))
+
+  (setq org-agenda-custom-commands '(("M" "Monthly agenda"
+									  ((agenda "" ((org-agenda-span 'month)))) nil)
+									  ("y" "Yearly agenda"
+									  ((agenda "" ((org-agenda-span 'year)))) nil)))
+
+  (setq org-todo-keywords
+	  '((sequence
+		  "TODO(t)" "PROJECT(p)" "DOING(T)" "ACTIVE(a)" "NEXT(n)"
+		  "START(s)" "FINISH(R)" "PLAN(P)" "IMPROVE(i)"
+		  "|"
+		  "DONE(d/!)" "CANCEL(c@/!)" "WAIT(w)" "FAILED(f)"
+		  )
+		(sequence "HUMAN(h)" "|" "DONE(d)")
+		(sequence "BUG(b)" "|" "DONE(F)")
+		(sequence "FIX(d)" "|" "DONE(d)")
+		(sequence "REMEMBER(r)" "|" "DONE(d)")
+		(sequence "LEARN(L)" "|" "DONE(d)"))))
+#+end_src
+
+*** Main org-mode config
+Here is org-mode configuration. It loads languages for
+org-babel. Makes headers biggers to make it look like real
+documents. Adds new =TODO= sequences, here's table for that
+
+| Key | Sequence Name | Is done |
+|-----+---------------+---------|
+| t   | TODO          | no      |
+| p   | PROJECT       | no      |
+| T   | DOING         | no      |
+| a   | ACTIVE        | no      |
+| n   | NEXT          | no      |
+| s   | START         | no      |
+| f   | FINISH        | no      |
+| b   | BUG           | no      |
+| d   | DONE          | yes     |
+| c   | CANCEL        | yes     |
+| w   | WAIT          | yes     |
+| F   | FIXED         | yes     |
+
+#+begin_src elisp
+(use-package org
+  :ensure t
+  :straight t
+  :after evil
+  :config
+  (require 'ox-md)
+  (org-mode-change-variables)
+  (org-mode-configure-faces)
+
+  (plist-put org-format-latex-options :background "Transparent")
+  
+  (org-babel-do-load-languages
+	  'org-babel-load-languages
+	  '((python . t)
+		(emacs-lisp . t)
+		(shell . t)
+		(plantuml . t)
+		(lua . t)
+		(C . t)
+		(sql . t)
+	  ))
+
+  (evil-define-key '(normal visual motion) org-mode-map
+			  "gj" 'evil-next-visual-line
+			  "gk" 'evil-previous-visual-line)
+
+  :bind (:map global-map
+			  ("M-o a"   . org-agenda)
+			  ("C-c C-'" . org-edit-src-exit)
+			  ("C-c C--" . org-edit-src-exit)
+			  ("C-c x"   . org-capture)
+
+			  ;; pomodoro timer
+			  ("M-o P s"   . org-timer-set-timer)
+			  ("M-o P S"   . org-timer-stop)
+			  ("M-o P b"   . org-timer-start)
+			  ("M-o P SPC" . org-timer-pause-or-continue)
+			  )
+
+		  (:map org-mode-map
+				("C-<tab>" . org-cycle)
+				("C-c c" . insert-header-counter)
+				("C-c C" . insert-counter)
+				("C-c t" . org-todo)
+				("C-M-i" . org-toggle-inline-images)
+				("C-S-C" . org-toggle-checkbox)
+				("M-p" . org-move-subtree-up)
+				("M-n" . org-move-subtree-down)
+				("M-o s s" . org-schedule)
+				("M-o s d" . org-deadline)
+				("M-o e" . org-export-dispatch)
+				("C-M-SPC"   . org-next-item)
+				("C-M-S-SPC" . org-previous-item)
+				("C-c RET" . org-insert-subheading)
+				("M-o t" . org-babel-tangle)
+				("C-c i d" . create-header-insert-date)
+				("C-c i t" . create-header-insert-time)
+				("C-c i T" . insert-time)
+				("C-c i D" . insert-date)
+				("C-c C-'" . org-edit-special)
+				("C-M-h" . org-table-move-column-left)
+				("C-M-l" . org-table-move-column-right)
+				("C-c C--" . org-edit-latex-fragment)
+				("C-c u k" . org-priority-up)
+				("C-c u j" . org-priority-down)
+				("C-}" . org-ctrl-c-minus)))
+#+end_src
+
+** Additional org mode plugins
+*** Org-superstar
+Org modern used to be cool, but now it has arrows instead of cool
+bullets in headers. So, it's better to use just default org bullets
+and other plugins
+
+#+begin_src elisp
+(use-package org-superstar
+  :ensure t
+  :hook (org-mode . org-superstar-mode)
+  :config
+  (setq org-superstar-headline-bullets-list '("◉" "○" "" "✿")))
+#+end_src
+
+*** Org-roam
+Helps to build second brain
+#+begin_src elisp
+(use-package org-roam
+  :ensure t
+  :after org
+  :init
+  (setq org-roam-v2-ack t)
+  :config
+  (setq org-roam-directory "~/Org/roam")
+  :bind (:map org-mode-map
+			  ("M-o r s" . org-roam-db-sync)
+			  ("M-o r t" . org-roam-buffer-toggle)
+			  ("M-o r i" . org-roam-node-insert)
+			  ("M-o r f" . org-roam-node-find)))
+#+end_src
+
+*** Org-contrib
+#+begin_src elisp
+(use-package org-contrib
+  :ensure t
+  :after org
+  :init
+  (require 'ox-extra)
+  (require 'org-checklist)
+  (require 'org-invoice)
+  (ox-extras-activate '(ignore-headlines)))
+#+end_src
+
+*** Org-drill
+Org-Drill is an extension for Org mode. Org-Drill uses a spaced
+repetition algorithm to conduct interactive “drill sessions”, using
+org files as sources of facts to be memorised. Each topic is treated
+as a “flash card”. The material to be remembered is presented to the
+student in random order. The student rates his or her recall of each
+item, and this information is used to schedule the item for later
+revision
+
+#+begin_src elisp
+(use-package org-drill
+  :ensure t)
+#+end_src
+
+*** Google calendar synchronization
+Unfortunately, i didn't find org-mode that syncs using git repo on
+mobile phone
+
+#+begin_src elisp
+(with-conf-variable "emacsEnableOldVersionConfig" "no"
+  (use-package org-gcal
+	:ensure t
+	:after org
+	:straight (org-gcal
+			   :host github
+			   :type git
+			   :repo "kidd/org-gcal.el")
+	;; If you want to use the plugin, you need to configure these variables
+	;; in src/local.el.
+	;; Follow guide on line below in order to configure these variables
+	;; https://github.com/kidd/org-gcal.el/blob/master/README.org.
+	;; 
+	;; + org-gcal-client-id
+	;; + org-gcal-client-secret
+	;; + org-gcal-file-alist
+	:bind (:map org-mode-map
+				("M-o S b" . org-gcal-sync-buffer)
+				("M-o S a" . org-gcal-sync)
+				("M-o S p" . org-gcal-post-at-point))))
+#+end_src
+
+*** Notifier
+Send notifications for scheduled or deadlined headers
+#+begin_src elisp
+(use-package org-wild-notifier
+  :ensure t
+  :config
+  (org-wild-notifier-mode)
+  (setq org-wild-notifier-alert-time '(1)
+		org-wild-notifier--alert-severity 'low
+		org-wild-notifier-notification-title "org-agenda"
+		org-wild-notifier-notification-icon (format
+											 "/home/%s/.config/emacs/mine/src/resources/icons/org-mode-unicorn.png"
+											 user-login-name)
+		alert-default-style 'libnotify
+		alert-fade-time 40))
+#+end_src
+
+*** Trello sync
+You may ask, why do i need org mode and trello. Unfortunately, i'm
+the only one in family that likes some "nerdy" stuff such as org-mode
+#+begin_src elisp
+(with-conf-variable "emacsEnableOrgTrello" "yes"
+  (use-package org-trello
+	:ensure t
+	:config
+	(custom-set-variables
+	 '(org-trello-files '(
+						  "~/Org/trello/balandins-trello.org"
+						  "~/Org/trello/test.org"
+						  )))))
+#+end_src
+
+*** Image downloader
+Download images. It's very annoying and inefficient to download image
+and write location to it
+#+begin_src elisp
+(use-package org-download
+  :ensure t
+  :config
+  (setq-default org-download-image-dir "~/Org/images/downloaded/")
+  :bind (:map org-mode-map
+			  ("M-o d" . org-download-image)))
+#+end_src
+
+*** Show emphasis
+Make visible some elements such as emphasis markers, links and many other
+#+begin_src elisp
+(use-package org-appear
+  :ensure t
+  :hook
+  (org-mode . org-appear-mode))
+#+end_src
+
+*** Enable gifs
+#+begin_src elisp
+(use-package org-inline-anim
+  :ensure t
+  :hook (org-mode . org-inline-anim-mode))
+#+end_src
+
+*** Create table of contents
+Creating TOC by your hands is very boring
+
+#+begin_src elisp
+(use-package toc-org
+  :ensure t
+  :hook (org-mode . toc-org-mode))
+#+end_src
+
+*** Visual align tables
+Sometimes i need images inside tables, for example LaTex formulas.
+But the tables don't look like tables, they look like chaos, therefore
+the plugin is required here. Unfortunately i couldn't do it using
+use-package with straight-use-package integration, therefore i copied
+the script
+
+#+begin_src elisp
+;; (load "~/.config/emacs/mine/src/not-mine/org+align-table.el")
+
+;; (add-hook 'org-mode-hook 'org+-align-table-mode)
+#+end_src
+
+** Org mode presentations
+*** Visual fill column
+It's a plugin to make presentations look more like presentations.
+It puts the text in center
+
+**** Define functions
+It should have functions that enable or disable it
+#+begin_src elisp
+(defun enable-visual-fill-column ()
+  (interactive)
+  (visual-fill-column-mode)
+  (display-line-numbers-mode 0))
+
+(defun disable-visual-fill-column ()
+  (interactive)
+  (visual-fill-column-mode 0)
+  (display-line-numbers-mode t))
+#+end_src
+
+**** Save centering the text
+It's very annoying that in some org buffers it doesn't center the text
+#+begin_src elisp
+(defun visual-fill-column-enable-center ()
+  (setq visual-fill-column-center-text t))
+
+(add-hook 'org-mode-hook #'visual-fill-column-enable-center)
+#+end_src
+
+**** Main visual-fill-column config
+#+begin_src elisp
+(use-package visual-fill-column
+  :ensure t
+  :straight (visual-fill-column
+			 :host github
+			 :repo "nobody926/visual-fill-column")
+  :hook (visual-line-mode-hook . visual-fill-column-mode)
+  :config
+  (setq visual-fill-column-center-text t)
+  (advice-add 'text-scale-adjust :after #'visual-fill-column-adjust)
+  :bind (:map org-mode-map
+    ("M-o i e" . enable-visual-fill-column)
+    ("M-o i d" . disable-visual-fill-column)))
+#+end_src
+
+*** Define enable presentation functions
+- Enable presentation mode does:
+  + Show images
+  + Remap faces
+  + Enable [[Visual fill column][visual-fill-column]]
+  + Run org-present
+  + Increases text size by 4
+  + Increase LaTeX preview to 2.0
+  + Disables [[Ewal][ewal]]
+  + Enables [[Doom emacs ui elements][doom-nord]] theme if user wants
+- Disable presentation mode does
+  + Disable [[Visual fill column][visual-fill-column]]
+  + Run org-present-quit
+  + Enables [[Ewal][ewal]]
+  + Revert faces
+
+We need variables to configure LaTeX previews
+#+begin_src elisp
+(defvar org-latex-previews-presentation-font-size 2.5
+  "Org LaTeX preview font size for when (enable-presentation-mode) is running")
+
+(defvar org-latex-previews-on-disable-font-size 1.5
+  "Org LaTeX preview font size for when (enable-presentation-mode) stopped running")
+#+end_src
+
+#+begin_src elisp
+(defun enable-presentation-mode ()
+  (text-scale-increase 4)
+  (org-latex-preview-scale-change org-latex-previews-presentation-font-size)
+
+  (org-display-inline-images)
+  (enable-visual-fill-column)
+  (org-present)
+
+  (when (y-or-n-p (format "Load theme %s?" (get-theme "presentation")))
+	(disable-ewal "presentation"))
+
+  (message "Press C-c C-x C-l to enable LaTeX fragments"))
+
+(defun disable-presentation-mode ()
+  (text-scale-set 0)
+  (org-latex-preview 0)
+  (org-latex-preview-scale-change org-latex-previews-on-disable-font-size)
+
+  (org-remove-inline-images)
+  (disable-visual-fill-column)
+  (org-present-quit)
+
+  (if-conf-variable "colorscheme" "pywal"
+	(enable-ewal)
+	(disable-ewal)))
+#+end_src
+
+Define minor-mode
+#+begin_src elisp
+(define-minor-mode org-presentation-mode
+  "Toggle 'org-presentation-mode' on or off"
+  :interactive t
+  :init-value nil
+  (if (derived-mode-p 'org-mode)
+	  (if (eq org-presentation-mode nil)
+		  (disable-presentation-mode)
+		(enable-presentation-mode))
+	(progn
+	  (setq org-presentation-mode nil)
+	  (message "You can use this minor-mode only in org-mode"))))
+#+end_src
+
+*** Export presentation
+Sometimes i need to show my presentations at school and teachers
+don't heave emacs and all those plugins installed. Therefore,
+presentations should be exported to some formats that people
+can see without emacs
+
+Run script. I tried to do that in elisp by launching async-shell-command.
+It took screenshot of last slide because idk. Therefore, i decided not to
+fuck my brain and my nerves and do it using shell
+#+begin_src elisp
+(defun org-presentation-export ()
+  "Export presentation to pdf format. This one will have name
+according to header 'PRESENTATION_EXPORT_NAME' in org-mode. This
+function call script '~/.config/scripts/emacs/org-presentation-export'.
+You can also configure this script by configuring settings.conf
+variables
+- '$emacsOPEcopyOutputPath'
+- '$emacsOPEworkdir'"
+  (interactive)
+  (if (bound-and-true-p org-present-mode)
+	(start-process-shell-command "async-shell-command" nil
+								 (concat
+								  "~/.config/scripts/emacs/org-presentation-export "
+								  buffer-file-name " "
+								  (org-get-keyword-variable-value
+								   "PRESENTATION_EXPORT_NAME")))
+	(message "You need to activate org-present-mode first")))
+#+end_src
+
+It works like
+1) Read slides
+2) Copy path of output, if set =$emacsOPEcopyOutputPath= to =yes=
+   To get file path, you need to copy from clipboard manager the file
+   name
+3) Loop through them and take screenshots into $workingDirectory
+4) Convert in pdf to $output
+
+You can also only print images. Sometimes it is useful
+#+begin_src elisp
+(defun org-presentation-export-images ()
+  "Export presentation to images to '$emacsOPEworkdir'. This one will have name
+according to header 'PRESENTATION_EXPORT_NAME' in org-mode. This
+function call script '~/.config/scripts/emacs/org-presentation-export'.
+You can also configure this script by configuring settings.conf
+variables
+- '$emacsOPEcopyOutputPath'
+- '$emacsOPEworkdir'"
+  (interactive)
+  (if (bound-and-true-p org-present-mode)
+	(start-process-shell-command "async-shell-command" nil
+								 (concat
+								  "~/.config/scripts/emacs/org-presentation-export "
+								  buffer-file-name " "
+								  (org-get-keyword-variable-value
+								   "PRESENTATION_EXPORT_NAME") " "
+								  "--photos-only"))
+	(message "You need to activate org-present-mode first")))
+#+end_src
+
+*** Main org-present config
+#+begin_src elisp
+(use-package org-present
+  :ensure t
+  :config
+  (setq org-present-hide-stars-in-headings nil)
+  :bind (:map org-mode-map
+    ("M-o p p" . org-presentation-mode)
+    ("M-o p e" . org-presentation-export)
+    ("M-o p E" . org-presentation-export-images)
+    ("C-S-T" . org-present)
+    ("C->" . org-present-next)
+    ("C-<" . org-present-prev)))
+#+end_src
+
+** Rainbow
+rainbow-delimiters is a "rainbow parentheses"-like mode which
+highlights delimiters such as parentheses, brackets or braces
+according to their depth. Helps to read code
+
+#+begin_src elisp
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+Highlight colors to easily customize colors
+#+begin_src elisp
+(use-package rainbow-mode
+  :ensure t
+  :hook (org-mode prog-mode conf-mode))
+#+end_src
+
+** Ui stuff
+*** Doom emacs
+Here are doom modeline and doom themes. Doom themes are used in
+- [[Org mode presentations][org mode presentations]]
+- [[Reader mode][reader mode]]
+
+#+begin_src elisp
+(use-package doom-modeline
+  :ensure t
+  :init
+  (doom-modeline-mode)
+  :config
+  (setq doom-modeline-height 36
+        doom-modeline-modal-icon 'evil
+        doom-modeline-evil-indicator t))
+
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+		;; use "doom-colors" for less minimal icon theme
+        doom-themes-treemacs-theme "doom-atom"
+		doom-themes-treemacs-enable-variable-pitch nil
+        doom-themes-enable-italic nil) ; if nil, italics is universallyb disabled
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(with-conf-variable "emacsEnableOldVersionConfig" "no"
+  (use-package doom-everblush-theme
+	:ensure t
+	:straight (doom-everblush-theme
+			   :type git
+			   :host github
+			   :repo "Everblush/doomemacs")))
+#+end_src
+
+*** Indentation lines
+#+begin_src elisp
+(use-package highlight-indent-guides
+  :ensure t
+  :hook (prog-mode yaml-mode)
+  :config
+  (setq highlight-indent-guides-method 'character))
+#+end_src
+
+*** Ewal
+The plugin uses doom themes and syncs with pywal
+
+**** Define functions
+:PROPERTIES:
+:CUSTOM_ID: ewal-define-functions
+:END:
+
+Define variable of transpareny level
+#+begin_src elisp
+(defvar transparency-level 93
+  "Transparency level for emacs. It is used in functions that set
+transparency")
+#+end_src
+
+It should be enabled and disabled. Define function that do it
+#+begin_src elisp
+(defun get-theme (&optional choice)
+  "If CHOICE is not nil, it will choose theme depending on this variable.
+Here are values of this parameter
+'presentation' --> doom-nord-light
+'reader' --> doom-gruvbox-light
+
+If CHOICE is nil, it will pick return theme depending on $colorscheme
+from settings.conf. You can find available colorschemes in
+~/.files-balamah/src/colorschemes
+"
+  (if choice
+	  (progn (pcase choice
+			   ("presentation" 'doom-nord-light)
+			   ("reader" 'doom-gruvbox-light)))
+	(progn (pcase (read-conf-variable "~/.files-balamah/settings.conf"
+									  "colorscheme")
+			 ((or "onedark-gray" "onedark-cyan") 'doom-one)
+			 ("gruvbox"                          'doom-gruvbox)
+			 ("dracula"                          'doom-dracula)
+			 ("everblush"                        'doom-everblush)
+			 ("nord"                             'doom-nord)
+			 ("pywal"                            'ewal-doom-one)))
+	)
+  )
+
+(defun disable-themes ()
+  "Disable all loaded themes"
+  (dolist (theme custom-enabled-themes)
+	(disable-theme theme)))
+
+(defun disable-ewal (&optional is-not-coding)
+  "Check documentation for 'get-theme' to get lawful values of
+parameter 'is-not-coding'"
+
+  (disable-themes)
+  (if-conf-variable "transparencyWithoutPywal" "no"
+	(change-transparency 100)
+	(change-transparency transparency-level))
+  (if is-not-coding
+      (load-theme (get-theme is-not-coding) t)
+	(load-theme (get-theme) t)))
+
+(defun disable-ewal-for-toggle ()
+  "It disables ewal for 'ewal-mode', for toggling.
+This function depends on '$emacsAlternateTheme'"
+  (let* ((theme (read-conf-variable
+				 "~/.files-balamah/settings.conf" "emacsAlternateTheme"))
+		 (theme-to-load (if (equal theme "current")
+							(get-theme)
+						  (intern theme))))
+	(load-theme theme-to-load t))
+  (if-conf-variable "transparencyWithoutPywal" "no"
+	(change-transparency 100)
+	(change-transparency transparency-level)))
+
+(defun enable-ewal ()
+  (disable-themes)
+  (with-conf-variable "colorscheme" "pywal"
+	(change-transparency transparency-level)
+	(load-theme 'ewal-doom-one t))
+
+  (unless-conf-variable "colorscheme" "pywal"
+	(load-theme (get-theme) t)))
+#+end_src
+
+Now, define toggle functions
+#+begin_src elisp
+;; FUCK: I couldn't convert this to minor-mode for it causes recursion.
+;; Don't know why
+
+(defvar ewal-mode nil)
+
+(defun ewal-mode ()
+  (interactive)
+  (if (eq ewal-mode nil)
+      (disable-ewal-for-toggle)
+	(enable-ewal))
+
+  (setq ewal-mode (not ewal-mode)))
+
+(defun ewal-mode-presentation ()
+  (interactive)
+  (if (eq ewal-mode nil)
+      (disable-ewal "presentation")
+	(enable-ewal))
+
+  (setq ewal-mode (not ewal-mode)))
+#+end_src
+
+**** Main ewal config
+Bind the functions and install the plugin
+#+begin_src elisp
+(use-package ewal-doom-themes
+  :ensure t
+  :if (equal system-type 'gnu/linux)
+  :bind
+  ("C-c w" . ewal-mode)
+  ("C-c W" . ewal-mode-presentation)
+  :config
+  (setq ewal-built-in-palette "sexy-material"))
+#+end_src
+
+*** Load theme
+This one loads colorscheme from =(get-theme)=
+
+#+begin_src elisp
+(with-eval-after-load 'doom-themes
+  (load-theme (get-theme) t))
+#+end_src
+
+** Dashboard
+Emacs looks way cooler with dashboard
+
+*** Dashboard button functions
+I want make some buttons on my dashboard clickable while making main
+config consise
+
+#+begin_src elisp
+(defun dashboard-dired-open-dotfiles (&rest _)
+  (dired "~/.files-balamah"))
+
+(defun dashboard-open-dotfiles-readme (&rest _)
+  (find-file "~/.files-balamah/README.org"))
+
+(defun dashboard-edit-emacs-config (&rest _)
+  (find-file "~/.files-balamah/config/emacs/mine/editor-config.org"))
+
+(defun dashboard-package-upgrade-all (&rest _)
+  (when (y-or-n-p "Are you sure you want to upgrade plugins?")
+	(package-refresh-contents)
+	(package-upgrade-all)))
+
+(defun dashboard-restart-emacs (&rest _)
+  (restart-emacs-ask))
+
+(defun dashboard-scratch-buffer (&rest _)
+  (scratch-buffer))
+
+(defun dashboard-open-org-agenda (&rest _)
+  (org-agenda))
+
+(defun dashboard-counsel-bookmark (&rest _)
+  (call-interactively 'counsel-bookmark))
+
+(defun dashboard-projectile-switch-project (&rest _)
+  (projectile-find-file))
+
+(defun dashboard-councel-load-theme (&rest _)
+  (counsel-load-theme))
+
+(defun dashboard-ewal-mode (&rest _)
+  (ewal-mode))
+#+end_src
+
+*** Start dashboard on emacsclient start
+#+begin_src elisp
+(defun emacsclient-dashboard-start ()
+  "Start dashboard on start of 'emacsclient -c'"
+  (dashboard-refresh-buffer)
+  (get-buffer "*dashboard*"))
+#+end_src
+
+*** Main dashboard config
+#+begin_src elisp
+(use-package dashboard
+  :ensure t
+  :init
+  (setq dashboard-banner-logo-title "Welcome to GNU Emacs"
+        dashboard-show-shortcuts t
+        dashboard-display-icons-p t
+        dashboard-icon-type 'nerd-icons
+        dashboard-set-heading-icons t
+        dashboard-set-file-icons t
+        dashboard-startupify-list '(dashboard-insert-banner
+                                    dashboard-insert-newline ;; newline
+                                    dashboard-insert-banner-title
+                                    dashboard-insert-newline ;; newline
+                                    dashboard-insert-navigator
+                                    dashboard-insert-newline ;; newline
+                                    dashboard-insert-init-info
+                                    dashboard-insert-items
+									dashboard-insert-footer)
+        dashboard-center-content t
+        dashboard-startup-banner "~/.config/emacs/mine/src/resources/icons/10.txt"
+        dashboard-items-face t)
+  ;; here are 3 colors:
+  ;; normal, warning, error
+  (with-conf-variable "emacsDashboardOption" "buttons"
+	(setq dashboard-navigator-buttons
+		  `(;; dotfiles
+			(("" "Dotfiles"
+			  "Open ~/.files-balamah/ directory\ndashboard-dired-open-dotfiles"
+			  dashboard-dired-open-dotfiles)
+			 ("" "Dotfiles guide"
+			  "Open ~/.files-balamah/README.org\ndashboard-open-dotfiles-readme"
+			  dashboard-open-dotfiles-readme)
+			 )
+			(;; dashboard sections substitution
+			 ("" "Open project files"
+			  "Open files from projects\ndashboard-projectile-switch-project"
+			  dashboard-projectile-switch-project)
+			 ("" "Open scratch buffer"
+			  "Open scratch buffer to write something\ndashboard-scratch-buffer"
+			  dashboard-scratch-buffer)
+			 ("" "Jump to bookmark"
+			  "Open file at location quickly\ncounsel-bookmark"
+			  dashboard-counsel-bookmark)
+			 )
+			(;; org-mode stuff
+			 ("" "Org agenda"
+			  "Open org-agenda using M-o a\ndashboard-open-org-agenda"
+			  dashboard-open-org-agenda)
+			 ("" "Emacs config"
+			  "Open emacs org config\ndashboard-edit-emacs-config"
+			  dashboard-edit-emacs-config)
+			 )
+			(;; emacs actions
+			 ("" "Upgrade plugins"
+			  "Upgrade emacs packages to new versions\ndashboard-package-upgrade-all"
+			  dashboard-package-upgrade-all error)
+			 ("" "Restart emacs"
+			  "Restart emacs\ndashboard-restart-emacs"
+			  dashboard-restart-emacs error)
+			 ("" "Change theme"
+			  "Change emacs ui theme\ndashboard-councel-load-theme"
+			  dashboard-councel-load-theme error)
+			 ("" "Toggle theme"
+			  "Toggle between pywal and onedark\ndashboard-ewal-mode"
+			  dashboard-ewal-mode error)))
+        dashboard-items '((recents  . 10)
+						  )))
+  (with-conf-variable "emacsDashboardOption" "elements"
+	(setq dashboard-items '((recents  . 5)
+							(bookmarks . 5)
+							(agenda . 6))))
+  :config
+  (dashboard-setup-startup-hook)
+  (setq initial-buffer-choice 'emacsclient-dashboard-start)
+  (global-set-key (kbd "C-c b") 'dashboard-open)
+
+  (dolist (message '("Christ is the LORD" 
+                   "Ο Ιησούς Χριστός είναι Κυρίως"
+                   "Focus on the task"))
+	(add-to-list 'dashboard-footer-messages message)))
+#+end_src
+
+*** Other dashboard variation
+This will be set if =$emacsDashboardOption= is equal to =doom=
+
+#+begin_src elisp
+(with-conf-variable "emacsDashboardOption" "doom"
+  (use-package doom-dashboard
+	:straight (doom-dashboard-fixed
+			   :host github
+			   :repo "nobody926/doom-dashboard-fixed")
+	:after dashboard
+	:demand t
+	:bind (:map dashboard-mode-map
+				("<remap> <dashboard-previous-line>" . widget-backward)
+				("<remap> <dashboard-next-line>" . widget-forward)
+				("<remap> <previous-line>" . widget-backward)
+				("<remap> <next-line>"  . widget-forward)
+				("<remap> <right-char>" . widget-forward)
+				("<remap> <left-char>"  . widget-backward))
+	:custom
+	(dashboard-banner-logo-title "Balamah's Emacs")
+	(dashboard-startup-banner "~/.config/emacs/mine/src/resources/icons/10.txt")
+	(dashboard-footer-icon
+	 (nerd-icons-faicon "nf-fa-github_alt" :face 'success :height 1.5))
+	(dashboard-page-separator "\n")
+	(dashboard-startupify-list `(dashboard-insert-banner
+								 dashboard-insert-banner-title
+								 dashboard-insert-items
+								 ,(dashboard-insert-newline 2)
+								 dashboard-insert-init-info
+								 ,(dashboard-insert-newline 2)
+								 doom-dashboard-insert-homepage-footer))
+	(dashboard-item-generators
+	 '((recents   . doom-dashboard-insert-recents-shortmenu)
+	   (bookmarks . doom-dashboard-insert-bookmark-shortmenu)
+	   (projects  . doom-dashboard-insert-project-shortmenu)
+	   (agenda    . doom-dashboard-insert-org-agenda-shortmenu)))
+	(dashboard-items '(projects agenda bookmarks recents))))
+#+end_src
+
+** Keycast
+This package provides four modes that display the current command and
+its key or mouse binding It shows current command and it's
+binding. Can be pretty useful for debugging your garbage packages
+
+#+begin_src elisp
+(use-package keycast
+  :ensure t)
+#+end_src
+
+** Monkeytype
+A typing game/tutor inspired by the open source and community driven
+monkeytype.com but for emacs. Useful to learn some poems for school
+subjects
+
+#+begin_src elisp
+(defun custom-monkeytype-mode-hook ()
+  "Hooks for monkeytype-mode"
+  (evil-insert -1))
+
+(use-package monkeytype
+  :ensure t
+  :config (add-hook 'monkeytype-mode-hook #'custom-monkeytype-mode-hook)
+  :bind (:map org-mode-map
+			  ("C-c M" . monkeytype-region)))
+
+#+end_src
+
+** String cases cycle
+Evil operator to cycle text objects through camelCase, kebab-case,
+snake_case and UPPER_CASE. It's looks pretty cool to cycle between
+string cases
+
+#+begin_src elisp
+(use-package evil-string-inflection
+  :ensure t
+  :bind (:map global-map
+			  ("C-{" . string-inflection-all-cycle)))
+#+end_src
+
+** Emacs everywhere
+Sometimes it is painful to enter some lists for people in debates not
+using emacs, and it would be better if you could invoke emacs
+instantly
+
+#+begin_src elisp
+(use-package emacs-everywhere
+  :ensure t
+  :config
+  (setq emacs-everywhere-major-mode-function 'org-mode))
+#+end_src
+
+** Projects
+It has two plugins, projectile and treemacs
+
+*** Define connect function
+The function needs to connect treemacs and projectile
+#+begin_src elisp
+(defun add-project (dir)
+  (interactive (list (read-directory-name "Add to known projects: ")))
+  (projectile-add-known-project dir)
+  (treemacs-add-project dir))
+#+end_src
+
+*** Projectile
+**** Main projectile config
+This plugin allows you to open files from known projects with style
+#+begin_src elisp
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode)
+  (setq projectile-resolve-symlinks nil)
+  :bind (:map global-map
+			  ("C-c C-p C-a" . add-project)
+			  ("C-c C-p C-r" . projectile-remove-known-project)
+			  ("C-c C-p C-s" . projectile-switch-project)
+			  ("<leader>Ps" . projectile-switch-project)
+			  ("<leader>Pf" . projectile-find-file)
+			  ("<leader>Pg" . projectile-grep)
+			  ))
+#+end_src
+
+**** Resolve file names
+#+begin_src elisp
+(require 'cl-lib)
+
+(defun file-truename-with-symlink-preserved (orig-fn &rest args)
+  "Prevent resolving symlinks in file paths under certain directories."
+  (let* ((file (car args))
+         (directories-original (read-conf-variable
+                                (expand-file-name "~/.files-balamah/settings.conf")
+                                "emacsFileSymlinkPreserveDirectories"))
+         (directories (split-string directories-original ",")))
+    (if (cl-some (lambda (directory)
+                   (string-prefix-p (expand-file-name (string-trim directory))
+                                    (expand-file-name file)))
+                 directories)
+        (expand-file-name file)
+      (apply orig-fn args))))
+
+(with-conf-variable "emacsFileSymlinkPreserve" "yes"
+  (advice-add 'file-truename :around #'file-truename-with-symlink-preserved))
+
+(defun around-projectile-without-resolving-symlinks (orig-fn &rest args)
+  "Temporarily disable symlink resolution inside Projectile."
+  (cl-letf (((symbol-function 'file-truename)
+             (lambda (f) (expand-file-name f))))
+    (apply orig-fn args)))
+
+(with-conf-variable "emacsFileGlobalSymlinkPreserve" "yes"
+  (advice-add 'projectile-project-root
+			:around #'around-projectile-without-resolving-symlinks))
+#+end_src
+
+*** Treemacs
+This plugin is needed for project tree
+#+begin_src elisp
+(use-package treemacs
+  :ensure t
+  :defer t
+  :bind
+  (:map global-map
+			  ("M-0" . treemacs))
+  (:map treemacs-mode-map
+		("C-<tab>" . treemacs-TAB-action))
+  :config
+  (setq treemacs-no-png-images t))
+#+end_src
+
+*** Some treemacs additional plugins
+#+begin_src elisp
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
+
+(use-package treemacs-nerd-icons
+  :after (treemacs evil)
+  :ensure t
+  :config (treemacs-load-theme "nerd-icons"))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
+#+end_src
+
+** Transpose frame
+It allows change windows layout like in dwm
+
+#+begin_src elisp
+(use-package transpose-frame
+  :ensure t
+  :bind ((:map global-map
+			   ("C-$" . flop-frame)
+			   ("C-%" . transpose-frame)
+			   ("<leader>ff" . flop-frame)
+			   ("<leader>ft" . transpose-frame)
+			   )))
+#+end_src
+
+** Dired
+*** Additional plugins
+#+begin_src elisp
+(use-package dired-open-with
+  :ensure t
+  :after dired
+  :bind (:map dired-mode-map
+			  ("C-S-<return>" . dired-open-with)))
+#+end_src
+
+*** Main dired config
+#+begin_src elisp
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :config
+  (require 'dired-x)
+  (setq dired-listing-switches "-lhaF --group-directories-first"
+		dired-kill-when-opening-new-dired-buffer t
+		dired-dwim-target t
+		dired-guess-shell-alist-user '(("\\.gif\\'"  . "sxiv")
+                                       ("\\.jpg\\'"  . "sxiv")
+                                       ("\\.png\\'"  . "sxiv")
+                                       ("\\.webp\\'" . "sxiv")
+                                       ("\\.mkv\\'"  . "mpv")
+                                       ("\\.mp4\\'"  . "mpv")))
+  (evil-collection-define-key 'normal 'dired-mode-map
+	"h" 'dired-up-directory
+	"l" 'dired-find-file
+	")" 'dired-create-empty-file
+	"%p" 'set-file-modes))
+#+end_src
+
+** Which key
+which-key is a minor mode for emacs that displays the key bindings
+following your currently entered incomplete command (a prefix) in a
+popup. You don't need to learn by heart keybindings anymore. Currently
+deprecated, for emacs 30.1 has this minor mode built-in
+
+#+begin_src elisp
+(with-conf-variable "emacsEnableOldVersionConfig" "yes"
+  (use-package which-key
+    :ensure t
+    :straight (which-key
+			   :host github
+			   :repo "justbur/emacs-which-key")
+	:init
+	(require 'which-key)
+	(which-key-mode)))
+#+end_src
+
+** Python venv support
+This is a simple global minor mode which will replicate the changes
+done by virtualenv activation inside emacs. Allows to run python files
+and venv without pain
+
+#+begin_src elisp
+(use-package pyvenv
+  :ensure t
+  :init
+  (pyvenv-mode t)
+  :config
+  (setq pyvenv-post-activate-hooks
+        (list (lambda ()
+                (setq python-shell-interpreter
+                      (concat pyvenv-virtual-env "/bin/python3")))))
+  (setq pyvenv-post-deactivate-hooks
+        (list (lambda ()
+                (setq python-shell-interpreter "python3"))))
+
+  :bind (:map global-map
+          ("C-c p a" . pyvenv-activate)
+          ("C-c p d" . pyvenv-deactivate)
+         :map evil-normal-state-map
+          ("<leader>pa" . pyvenv-activate)
+          ("<leader>pd" . pyvenv-deactivate))
+          )
+#+end_src
+
+** Drag stuff
+Drag Stuff is a minor mode for emacs that makes it possible to drag
+stuff (words, region, lines) around in emacs. A plugine that i always
+dreamed about. It's so cool to just drag the text
+
+#+begin_src elisp
+(use-package drag-stuff
+  :ensure t
+  :init
+  (drag-stuff-global-mode 1)
+  :bind
+  (:map global-map
+		("M-H" . drag-stuff-left)
+		("M-L" . drag-stuff-right)
+		("M-J" . drag-stuff-down)
+		("M-K" . drag-stuff-up)))
+#+end_src
+
+** Important major modes
+Useful major modes for configuration
+
+#+begin_src elisp
+(use-package dotenv-mode :ensure t)
+(use-package yaml-mode :ensure t)
+(use-package dockerfile-mode :ensure t)
+(use-package logview :ensure t)
+(use-package git-modes :ensure t)
+(use-package lua-mode :ensure t)
+(use-package crontab-mode :ensure t)
+(use-package twig-mode :ensure t)
+(use-package sxhkdrc-mode :ensure t)
+(use-package plantuml-mode :ensure t)
+(use-package groovy-mode :ensure t)
+(use-package ebuild-mode :ensure t
+  :straight (ebuild-mode :host github :repo "emacsmirror/ebuild-mode"))
+#+end_src
+
+** Gradle
+#+begin_src elisp
+(use-package gradle-mode
+  :ensure t
+  :hook (java-mode . gradle-mode))
+#+end_src
+
+** Holyc mode
+Based emacs major mode for Temple OS's HolyC programming language
+
+#+begin_src elisp
+(use-package holyc-mode
+  :ensure t
+  :straight (holyc-mode
+			 :host github
+			 :repo "Naheel-Azawy/holyc-mode.el"))
+#+end_src
+
+** Project TODOs
+*** Highlight
+#+begin_src elisp
+(use-package hl-todo
+  :ensure t
+  :hook ((prog-mode . hl-todo-mode)
+		 (yaml-mode . hl-todo-mode) )
+  :config
+  (setq hl-todo-highlight-punctuation ":"
+        hl-todo-keyword-faces
+        '(("TODO" warning bold)
+          ("FIXME" error bold)
+          ("REVIEW" font-lock-keyword-face bold)
+          ("HACK" font-lock-constant-face bold)
+          ("DEPRECATED" font-lock-doc-face bold)
+          ("NOTE" success bold)
+          ("BUG" error bold)
+          ("FUCK" error bold)
+          ("XXX" font-lock-constant-face bold))))
+#+end_src
+
+*** Show project TODOs
+#+begin_src elisp
+(use-package doom-todo-ivy
+  :ensure t
+  :straight (doom-todo-ivy
+			 :host github
+			 :repo "jsmestad/doom-todo-ivy")
+  :init
+  (require 'doom-todo-ivy)
+  :bind (:map global-map
+			  ("C-c C-x t" . doom/ivy-tasks)))
+#+end_src
+
+** Yasnippet
+It's snippet plugin that allows to create snippets without anal pain.
+Snippets are saved in =~/.config/emacs/mine/snippets=
+
+#+begin_src elisp
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode 1)
+  :config
+  (require 'warnings)
+  (setq yas-snippet-dirs '("~/.config/emacs/mine/snippets")
+        yas-indent-line 'fixed)
+  (add-to-list 'warning-suppress-types '(yasnippet backquote-change)))
+#+end_src
+
+** Magit
+Magit is an interface to the version control system Git, implemented
+as an emacs package
+
+#+begin_src elisp
+(use-package magit
+  :ensure t
+  :bind ("C-x g" . magit-status))
+#+end_src
+
+** Docker
+This is emacs integration for docker. Supports docker containers,
+images, volumes, networks, contexts and docker-compose
+
+#+begin_src elisp
+(use-package docker
+  :ensure t
+  :bind ("C-c 1 d" . docker))
+#+end_src
+
+** Lsp mode
+The plugin shows the errors in the code and allows going to definition
+
+*** Main lsp-mode config
+#+begin_src elisp
+(use-package lsp-mode
+  :ensure t
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t)
+  (setq lsp-headerline-breadcrumb-enable nil
+		lsp-enable-file-watchers nil)
+  :bind (:map lsp-mode-map
+			  ("C-<return>" . lsp-find-definition)
+			  ("C-S-<return>" . flycheck-list-errors)))
+
+(use-package lsp-ui
+  :ensure t)
+
+(use-package lsp-treemacs
+  :ensure t
+  :disabled t)
+#+end_src
+
+*** Python
+It ignores stupid python warnings such as
++ D103
++ D100
++ E402
++ E302
+
+#+begin_src elisp
+(use-package python-mode
+  :ensure t
+  :mode "\\.py\\'"
+  :after lsp-mode
+  :hook (python-mode . lsp-deferred)
+  :init
+  (add-hook 'python-mode-hook 'flycheck-mode)
+  (setq lsp-pylsp-plugins-flake8-ignore '((
+										   "D103" "D100" "E402" "E302" "E501" "C0116"
+										   "C0103"))
+        lsp-pylsp-server-command "~/.local/bin/pylsp"
+        lsp-pylsp-plugins-flake8-max-line-length 87))
+#+end_src
+
+*** Php
+The plugin sucks balls btw
+#+begin_src elisp
+(use-package php-mode
+  :ensure t
+  :mode "\\.php\\'"
+  :after lsp-mode
+  :hook (php-mode . lsp-deferred))
+#+end_src
+
+*** Lua
+#+begin_src elisp
+(use-package lua-mode
+  :ensure nil
+  :hook (lua-mode . lsp-mode))
+#+end_src
+
+*** Java
+#+begin_src elisp
+(use-package lsp-java
+  :ensure t
+  :hook (java-mode . lsp-deferred)
+  :config
+  (setq lsp-java-download-sources t
+        lsp-java-content-provider-preferred "fernflower")
+  :bind (:map java-mode-map
+			  ("M-C-0" . lsp-treemacs-java-deps-list)))
+#+end_src
+
+*** C
+#+begin_src elisp
+(setq c-basic-offset 4)
+
+(use-package c-mode
+  :ensure nil
+  :hook (c-mode . lsp-mode))
+
+(use-package c++-mode
+  :ensure nil
+  :hook (c++-mode . lsp-mode))
+#+end_src
+
+** Company mode
+The plugins allows to autocomplete like in normal IDEs
+
+*** Main company-mode config
+Install and enable the plugin
+#+begin_src elisp
+(use-package company
+  :ensure t
+  :straight (company
+			 :host github
+			 :repo "nobody926/company-mode")
+  :init
+  (global-company-mode t)
+  :config
+  ;; (add-to-list 'company-backends 'company-yasnippet)
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 2
+        company-show-numbers t
+        company-tooltip-limit 10
+        company-tooltip-align-annotations t
+		company-replace-existing nil
+        company-tooltip-flip-when-above t))
+#+end_src
+
+*** Fix snippets in LaTeX
+#+begin_src elisp
+(defun yas-disable-company ()
+  "Disable company-mode while a yasnippet snippet is active"
+  (with-conf-variable "emacsEnableCompanySnippetsLaTeX" "no"
+	(when (or (equal major-mode 'latex-mode) (equal major-mode 'LaTeX-mode))
+	  (company-mode -1))))
+
+(defun yas-enable-company ()
+  "Re-enable company-mode after yasnippet snippet exits"
+  (with-conf-variable "emacsEnableCompanySnippetsLaTeX" "no"
+	(when (or (equal major-mode 'latex-mode) (equal major-mode 'LaTeX-mode))
+	  (company-mode 1))))
+
+(add-hook 'yas-before-expand-snippet-hook #'yas-disable-company)
+(add-hook 'yas-after-exit-snippet-hook #'yas-enable-company)
+#+end_src
+
+*** Disable company-mode in org-mode
+Currently it's useless function. I saved it for future times. Maybe
+i'll need the function
+#+begin_src elisp
+(defun hook/disable-company-in-org ()
+  (company-mode -1))
+
+;; (add-hook 'org-mode-hook #'hook/disable-company-in-org)
+#+end_src
+
+*** Php
+#+begin_src elisp
+(use-package ac-php
+  :ensure t
+  :init
+  (auto-complete-mode t)
+  :config
+  (require 'company-php)
+  (ac-php-core-eldoc-setup)
+  (setq ac-sources '(ac-source-php))
+  :bind (:map global-map
+              ("M-]" . ac-php-find-symbol-at-point)
+              ("M-[" . ac-php-location-stack-back)))
+#+end_src
+
+*** Python
+Quickhelp may incorrectly place tooltip towards end of buffer. See [[https://github.com/expez/company-quickhelp/issues/72][here]]
+#+begin_src elisp
+(use-package anaconda-mode
+  :ensure t
+  :hook (python-mode-hook . anaconda-mode))
+
+(use-package company-anaconda
+  :ensure t
+  :init (require 'rx)
+  :after company
+  :config
+  (add-to-list 'company-backends 'company-anaconda))
+
+(use-package company-quickhelp
+  :ensure t
+  :config
+  (company-quickhelp-mode))
+#+end_src
+
+*** Haskell
+#+begin_src elisp
+(use-package haskell-mode
+  :ensure t)
+
+(use-package company-ghci
+  :ensure t
+  :hook (haskell-mode-hook . company-mode))
+#+end_src
+
+*** Frontend stuff
+It's html, css and js
+
+#+begin_src elisp
+(use-package company-web
+  :ensure t
+  :init
+  (require 'company)
+  (require 'company-web-html)
+  (require 'company-css))
+#+end_src
+
+*** AUCTeX
+#+begin_src elisp
+(use-package company-auctex
+  :ensure t
+  :init
+  (company-auctex-init))
+#+end_src
+
+** Debug
+#+begin_src elisp
+(use-package dap-mode
+  :ensure t
+  :config
+  (require 'dap-php)
+  (dap-php-setup)
+  :bind (:map global-map
+			  ("C-M-<return>" . dap-breakpoint-toggle)))
+#+end_src
+
+** Vterm
+Good terminal emulator inside emacs.
+Builtin emacs terminal emulators suck balls
+
+*** Define split functions
+I liked this feature in vscode and pycharm. You may ask, why didn't i use
+functions =split-below-switch-window= or =split-right-switch-window=? Answer
+is simple, it looks horrible with powerlevel10k theme zsh theme
+#+begin_src elisp
+(defun open-vterm-below-project-root ()
+  (interactive)
+  (split-below-switch-window 1)
+  (projectile-run-vterm))
+
+(defun open-vterm-right-project-root ()
+  (interactive)
+  (split-right-switch-window 1)
+  (projectile-run-vterm))
+
+(defun open-vterm-below ()
+  (interactive)
+  (split-below-switch-window 1)
+  (vterm))
+
+(defun open-vterm-right ()
+  (interactive)
+  (split-right-switch-window 1)
+  (vterm))
+#+end_src
+
+*** Define function to launch running vterm
+#+begin_src elisp
+(defun vterm-run-kill (process event)
+  (let ((b (process-buffer process)))
+    (and (buffer-live-p b)
+         (kill-buffer b))))
+
+(defun vterm-run (command &optional buffer-name)
+  (interactive
+   (list
+    (let* ((f (cond (buffer-file-name)))
+           (filename
+            (concat " " (shell-quote-argument (and f (file-relative-name f))))))
+      (read-shell-command "Terminal command: "))))
+  (let* ((name (if (not buffer-name)
+				   (concat "*" command "*")
+				 buffer-name)))
+	(with-current-buffer (vterm name)
+	  (set-process-sentinel vterm--process #'vterm-run-kill)
+	  (vterm-send-string command)
+	  (vterm-send-return))))
+
+(defun vterm-default-keybindings ()
+  (setq evil-default-state 'emacs))
+#+end_src
+
+*** Run scripts
+**** Define functions
+Define functions for running
+#+begin_src elisp
+(defun run-prepare ()
+  (when buffer-file-name (save-buffer))
+  (split-below-switch-window))
+
+(defun run (binary-name &optional is-only-file-name)
+  "Run current file using BINARY-NAME in vterm"
+  (run-prepare)
+  (let* ((filename (if is-only-file-name
+					   (get-only-file-name buffer-file-name)
+					 buffer-file-name))
+		 (formatted-filename (replace-regexp-in-string " " "\\\\ " filename)))
+	(vterm-run (format "%s %s" binary-name formatted-filename))))
+
+(defmacro defrun (function-name binary-name &optional is-only-file-name)
+  "Create interactive function with (run).
+WARNING: this macro creates function with prefix 'run-',
+for example:
+java --> run-java
+php  --> run-php
+"
+  (declare (indent defun))
+  `(defun ,(intern (concat "run-" (symbol-name function-name))) ()
+     (interactive)
+     (run ,binary-name ,is-only-file-name)))
+
+(defmacro defrunc (function-name &rest body)
+  "Create interactive function with (run-prepare).
+WARNING: this macro creates function with prefix 'run-',
+for example:
+java --> run-java
+php  --> run-php
+"
+  (declare (indent defun))
+  `(defun ,(intern (concat "run-" (symbol-name function-name))) ()
+     (interactive)
+	 (run-prepare)
+	 ,@body))
+#+end_src
+
+**** Run programming files
+Macroses =(defrun)= and =(defrunc)= are very useful here
+#+begin_src elisp
+(defrun php "php")
+(defrunc php-web (eww (concat "localhost/" (get-only-file-name buffer-file-name))))
+(defrunc localhost (eww "localhost"))
+(defrun python "python3")
+(defrun bookmark "br")
+(defrun java "java")
+
+(defrun php-container
+  "~/.config/scripts/emacs/run-php-file-container"
+  (get-only-file-name buffer-file-name))
+
+(defrun shell-script
+  (replace-regexp-in-string "\^J" ""
+							(shell-command-to-string
+							 (format "cat %s | grep '^#!' | sed 's@.*/@@g'"
+									 buffer-file-name))))
+#+end_src
+
+**** LaTeX compilation and opening
+Define LaTeX compilation flags
+#+begin_src elisp
+(defvar LaTeX-create-output-directory t
+  "The variable determines whether to create 'LaTeX-output-directory' or not")
+
+(defvar LaTeX-compiler "pdflatex"
+  "Compiler for LaTeX compilation")
+
+(defvar LaTeX-output-directory "./.output"
+  "Directory for LaTeX compilation")
+
+(defvar LaTeX-cflags (format "-output-directory %s" LaTeX-output-directory)
+  "LaTeX compilation flags")
+#+end_src
+
+Compile the document
+#+begin_src elisp
+(defun LaTeX-compile ()
+  (interactive)
+  (call-process-shell-command (concat LaTeX-compiler " "
+									  LaTeX-cflags " " buffer-file-name)))
+
+(defun LaTeX-open-log-file (filename)
+  "Open log file if exists and if prompt is yes"
+  (if (file-exists-p filename)
+	  (when (y-or-n-p "Open log file to see errors?")
+		(find-file filename))
+	(message "Errors appeared, and file didn't appear")))
+
+(defun LaTeX-compile-open ()
+  "Compile LaTeX document and open the file in zathura, if exists.
+Otherwise ask for input to open log file to see errors"
+  (interactive)
+  (unless (file-directory-p LaTeX-output-directory)
+	(make-directory LaTeX-output-directory))
+  (let* ((filename-base (file-name-base buffer-file-name))
+		 (filename (format "%s/%s.pdf" LaTeX-output-directory filename-base))
+		 (log-file (format "%s/%s.log" LaTeX-output-directory filename-base))
+		 (exit-code (LaTeX-compile))
+		 )
+	(if (equal exit-code 0)
+		(progn
+		  (start-process-shell-command "zathura" nil (format "zathura %s" filename))
+		  (message "%s successfully compiled" (get-only-file-name buffer-file-name))
+		  )
+	  (LaTeX-open-log-file log-file))))
+#+end_src
+
+**** Bind
+#+begin_src elisp
+(require 'python)
+(require 'php-mode)
+(require 'latex)
+
+(global-set-key (kbd "S-<f9>") 'run-shell-script)
+
+(map-bind '(("S-<f9>" . run-python)) python-mode-map)
+
+(map-bind '(("S-<f9>"   . run-php)
+			("S-M-<f9>" . run-php-container)
+			("S-<f10>"  . run-php-web)) php-mode-map)
+
+(map-bind '(("S-<f9>" . run-java)) java-mode-map)
+
+(with-eval-after-load 'bookmark
+  (map-bind '(("S-<f9>" . run-bookmark)) bookmark-mode-map))
+
+(map-bind '(("S-<f9>" . LaTeX-compile-open)
+			("S-M-<f9>" . LaTeX-compile)) LaTeX-mode-map)
+
+(global-set-key (kbd "S-<f12>") 'run-localhost)
+#+end_src
+
+*** Main vterm config
+And the plugin installation
+#+begin_src elisp
+(use-package vterm
+  :after evil
+  :ensure t
+  :config
+  :bind (:map global-map
+    ("C-M-`" . open-vterm-below)
+    ("C-M-~" . open-vterm-right)
+    ("C-`" . open-vterm-below-project-root)
+    ("C-~" . open-vterm-right-project-root))
+  (:map vterm-mode-map
+		("M-0" . treemacs)))
+#+end_src
+
+** Nyan cat mode
+Nyan Mode is an analog indicator of your position in the buffer. The
+Cat should go from left to right in your mode-line, as you move your
+point from 0% to 100%. Activates only on april first
+
+#+begin_src elisp
+(use-package nyan-mode
+  :ensure t
+  :if (and (equal (nth 4 (decode-time (current-time))) 4)
+           (equal (nth 3 (decode-time (current-time))) 1))
+  :init
+  (nyan-mode)
+  (nyan-start-animation))
+#+end_src
+
+** Sudo edit
+Utilities for opening files with sudo, gives us the ability to open
+files with sudo privileges or switch over to editing with sudo
+privileges if we initially opened the file without such privileges
+
+#+begin_src elisp
+(use-package sudo-edit
+  :ensure t)
+#+end_src
+
+** Sessions saving
+This program can save&load multiple named workspaces (or “workgroups”),
+
+- Save all opened buffers, their location and sizes on disk to restore
+  later
+- Restore special buffers as: org-agenda, shell, magit-status, help,
+  pdf-tools
+- Users can set up to support any special buffer (restoring the page
+  number and notes of pdf file, for example)
+
+#+begin_src elisp
+(use-package workgroups2
+  :ensure t
+  :config
+  (setq wg-session-file "~/.config/emacs/mine/.emacs-workgroups")
+  (workgroups-mode 1))
+#+end_src
+
+** Coding ligatures
+Without coding ligatures everything looks not cool
+
+#+begin_src elisp
+(use-package ligature
+  :ensure t
+  :config
+  (ligature-set-ligatures '(org-mode
+                            prog-mode
+                            haskell-mode
+                            text-mode
+                            markdown-mode
+                            lsp
+                            cc-mode
+                            vterm-mode
+							major-mode)
+
+                          '("|||>" "<|||" "<==>" "<!--" "####" "~~>"
+                            "***" "||=" "||>" ":::" "::=" "=:=" "==="
+                            "==>" "=!=" "=>>" "=<<" "=/=" "!==" "!!."
+                            ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->"
+                            "--" "-<<" "<~~" "<~>" "<*>" "<||" "<|>"
+                            "<$>" "<==" "<=>" "<=<" "<->" "<--" "<-<"
+                            "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_("
+                            "..<" "..." "+++" "/==" "///" "_|_" "www"
+                            "&&" "^=" "~~" "~@" "~=" "~>" "~-" "**"
+                            "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-"
+                            "{|" "[|" "]#" "::" ":=" ":>" ":<" "$>"
+                            "==" "=>" "!=" "!!" ">:" ">=" ">>" ">-"
+                            "-~" "-|" "->" "--" "-<" "<~" "<*" "<|"
+                            "<:" "<$" "<=" "<>" "<-" "<<" "<+" "</"
+                            "#{" "#[" "#:" "#=" "#!"  "##" "#(" "#?"
+                            "#_" "%%" ".=" ".-" ".." ".?" "+>" "++"
+                            "?:" "?=" "?." "??" ";;" "/*" "/=" "/>"
+                            "//" "__" "~~" "(*" "*)"
+                             "\\\\" "://"))
+
+  (global-ligature-mode t))
+#+end_src
+
+* Custom functional
+:properties:
+:header-args: :tangle ~/.config/emacs/mine/src/custom-functional.el
+:end:
+
+** Git sync
+It commits and pushes by pressing keybindings directories which are
+members of =git-sync-directories= list. Useful for org-mode directory
+sync, you have full sync while using git. Here are keybindings
+
+| Keychord  | Action                         | Command                    |
+|-----------+--------------------------------+----------------------------|
+| C-c S a   | Sync everything in list        | git-sync-all-list          |
+| C-c S c   | Sync current directory         | git-sync-current-directory |
+| C-c S P c | Update current directory       | git-pull                   |
+| C-c S P a | Update all directories in list | git-pull-all-list          |
+
+*** Config
+#+begin_src elisp
+(defvar git-sync-directories '("~/Org/")
+  "directories for git-sync")
+
+(defvar git-sync-keybinding-prefix "C-c S"
+  "Prefix for git-sync keybindings")
+#+end_src
+
+*** Declare important functions and variables
+Then define functions for git. To make it work we need to
+1) get current git branch
+2) add
+3) commit
+4) push
+5) pull
+
+#+begin_src elisp
+(require 'vc-git)
+
+(defun get-current-git-branch ()
+  (vc-git--symbolic-ref (vc-git-root default-directory)))
+
+(defun git-add (repo-directory)
+  (message " adding files to commit...")
+  (cd repo-directory)
+  (shell-command "git add ."))
+
+(defun git-commit ()
+  (message " creating commit...")
+  (let ((date (format-time-string "%d.%m.%Y"))
+		(time (format-time-string "%H:%M")))
+	(shell-command (format "git commit -m '%s %s'" date time))))
+
+(defun git-push (branch repo-directory)
+  (message (format " pushing %s..." repo-directory))
+  (start-process-shell-command "git-sync-push" nil
+							   (format "git push -u origin %s" branch)))
+
+(defun git-pull ()
+  (interactive)
+  (message (format " pulling %s..." (vc-root-dir)))
+  (start-process-shell-command "git-sync-pull" nil "git pull")
+  (magit-refresh-all))
+
+(defun git-sync (repo-directory branch)
+  (git-add repo-directory)
+  (git-commit)
+  (git-push branch repo-directory)
+
+  (message " done syncing %s" repo-directory))
+#+end_src
+
+*** Main functions
+Then we need to create main function that pushes or syncs if needed
+
+**** Pull all list
+#+begin_src elisp
+(defun git-pull-all-list ()
+  (interactive)
+
+  (let ((previous-directory default-directory))
+	(dolist (directory git-sync-directories)
+	  (when (file-directory-p directory)
+		(cd directory)
+		(git-pull)))
+	(cd previous-directory)))
+#+end_src
+
+**** Sync current directory
+#+begin_src elisp
+(defun git-sync-current-directory ()
+  (interactive)
+  (if (get-current-git-branch)
+	  (progn
+		(when buffer-file-name (save-buffer))
+		(when (member (vc-root-dir) git-sync-directories)
+		  (git-sync (vc-root-dir) (get-current-git-branch))))
+	(message "This is not a git repository")))
+#+end_src
+
+**** Sync all directories
+#+begin_src elisp
+(defun git-sync-all-list ()
+  (interactive)
+
+  (when buffer-file-name (save-buffer))
+  (let ((previous-directory default-directory))
+	(dolist (directory git-sync-directories)
+	  (when (file-directory-p directory)
+		(message " syncing %s..." directory)
+		(cd directory)
+		(git-sync directory (get-current-git-branch))
+		(message "------------------------------")))
+
+	(cd previous-directory))
+
+  (message " done syncing git-sync-directories"))
+#+end_src
+
+*** Define minor-mode
+Bind the functions. It has prefix =C-c S=
+#+begin_src elisp
+(define-minor-mode git-sync-mode
+  "Toggle 'git-sync' functional on or off"
+  :global t
+  :interactive t
+  :init-value t
+  :keymap
+  (list (cons (pkbd git-sync-keybinding-prefix "a") #'git-sync-all-list)
+		(cons (pkbd git-sync-keybinding-prefix "c") #'git-sync-current-directory)
+		(cons (pkbd git-sync-keybinding-prefix "P c") #'git-pull)
+		(cons (pkbd git-sync-keybinding-prefix "P a") #'git-pull-all-list)))
+#+end_src
+
+** Project config
+Project config can do many things. One best thing is entry point for
+some projects. For example, i want to launch symfony telegram bot,
+i don't want to create function for one project in my config, it is
+better to have per-project config
+
+| Keychord  | Command                              |
+|-----------+--------------------------------------|
+| C-c p f c | project-config-file-create           |
+| C-c p f d | project-config-directory-find-delete |
+| C-c p f l | project-config-find-file-load        |
+| C-c p f o | project-config-file-open             |
+
+*** Getters
+At first, it is better to get the project file config
+#+begin_src elisp
+(defun project-get-root ()
+  (let* ((to-print (if (boundp 'current-project)
+					   current-project
+					 (projectile-project-root))))
+	(file-name-as-directory to-print)))
+
+(defun project-get-root ()
+  (let* ((to-print (if (bound-and-true-p current-project)
+                       current-project
+                     (projectile-project-root))))
+    (if to-print
+        (file-name-as-directory to-print)
+      default-directory)))
+
+(defun project-config-get-directory ()
+  (concat (project-get-root) ".emacs/"))
+
+(defun project-config-file-get ()
+  (concat (project-config-get-directory) "config.el"))
+
+(defun project-config-file-directory-get-path (file-directory)
+  "Returns path of file-directory.
+Here is example how to use
+(project-config-file-directory-get-path \"scripts/launcher\")"
+  (concat (project-config-get-directory) file-directory))
+#+end_src
+
+*** Defaults
+#+begin_src elisp
+(defvar project-config-file-no-file-message
+  "Project doesn't have .emacs/config.el, create it in project root"
+  "project-config-file-open and project-config-file-load show the message when
+project doesn't have .emacs/config.el")
+
+(defvar project-config-file-keybinding-prefix "C-c p f"
+  "Prefix for project-config-file-* keybindings")
+
+(defvar project-config-directory-template
+  "~/.config/emacs/mine/src/resources/.emacs"
+  "Template directory for project config. The template should have that structure
+.emacs
+├── config.el
+└── snippets
+    ├── conf-space-mode
+    │   ├── bookmark-all
+    │   ├── bookmark-base
+    │   └── bookmark-include
+    └── php-mode
+        ├── array-in
+        ├── array-not-in
+        └── array-push
+
+snippets/ directory is like your yasnippet directory, therefore it
+should have structure with modes like in that example that i have shown
+")
+#+end_src
+
+*** Create
+The function copies directory from =project-config-directory-template=
+to project root
+
+#+begin_src elisp
+(defun project-config-file-create ()
+  "Copy directory from project-config-directory-template to project root"
+  (interactive)
+  (copy-directory project-config-directory-template (project-get-root))
+  (message "%s has been created" (project-config-file-get)))
+#+end_src
+
+*** Open
+Open =project-config-file= which is obtained from =project-config-file-get=
+and the file is located in =(project-config-get-directory)/config.el=
+
+#+begin_src elisp
+(defun project-config-file-open ()
+  "Open project-config-file which gets from project-config-file-get and the file
+is located in (project-config-get-directory)/config.el"
+  (interactive)
+  (let ((project-config-file (project-config-file-get)))
+	(if (file-exists-p project-config-file)
+		(find-file project-config-file)
+	  (message project-config-file-no-file-message))))
+#+end_src
+
+*** Delete
+:PROPERTIES:
+:CUSTOM_ID: project-config-delete
+:END:
+
+At first it finds project config directory, then it deletes it, if you
+accept
+
+#+begin_src elisp
+(defun project-config-directory-delete (project-config-directory)
+  "Delete project config"
+  (when (y-or-n-p "Are you sure you want to delete project config?")
+	(delete-directory project-config-directory "recursive")))
+
+(defun project-config-directory-find-delete ()
+  "Find project config directory and delete"
+  (interactive)
+  (let ((project-config-directory (project-config-get-directory)))
+	(if (file-directory-p project-config-directory)
+		(project-config-directory-delete project-config-directory)
+	  (message project-config-file-no-file-message))))
+#+end_src
+
+*** Load
+Most important function - load. Works the same as [[#project-config-delete][delete]], at first it
+finds then loads
+
+#+begin_src elisp
+(require 'projectile)
+
+(defun project-config-file-load (project-config-file)
+  "Load project config file"
+  (message "Loading project config from %s" project-config-file)
+  (load-file project-config-file))
+
+(defun project-config-file-find-load ()
+  "Find project config file and load"
+  (interactive)
+  
+  (let ((project-config-file (project-config-file-get)))
+	(if (file-exists-p project-config-file)
+		(project-config-file-load project-config-file)
+	  (message project-config-file-no-file-message))))
+#+end_src
+
+*** Define minor mode
+#+begin_src elisp
+(define-minor-mode project-config-mode
+  "Toggle 'project-config-mode' functional on or off"
+  :global t
+  :interactive t
+  :init-value t
+  :keymap
+  (list
+   (cons (pkbd project-config-file-keybinding-prefix "c") #'project-config-file-create)
+   (cons (pkbd project-config-file-keybinding-prefix "o") #'project-config-file-open)
+   (cons (pkbd project-config-file-keybinding-prefix "d") #'project-config-directory-find-delete)
+   (cons (pkbd project-config-file-keybinding-prefix "l") #'project-config-file-find-load)
+   ))
+#+end_src
+
+** Reader mode
+To enable and disable reader-mode, you need to press =C-c r=
+
+*** Enable and disable
+Define enabling and disabling of reader-mode. Here is list
+of enable and disable
+- Enable
+  + set truncate-lines to nil
+  + disable line numbers
+  + enable highlight selected lines
+- Disable
+  + set truncate-lines to t
+  + enable line numbers
+  + disable highlight selected lines
+
+#+begin_src elisp
+(defun enable-reader-mode ()
+  (when (y-or-n-p "Enable gruvbox theme?")
+	(disable-ewal "reader"))
+
+  (setq truncate-lines nil)
+  (display-line-numbers-mode 0) 
+  (hl-line-mode t)
+
+  (message "reader-mode enabled"))
+
+(defun disable-reader-mode ()
+  (message "reader-mode disabled")
+
+  (if-conf-variable "colorscheme" "pywal"
+	(enable-ewal)
+	(disable-ewal))
+
+  (setq truncate-lines t)
+  (display-line-numbers-mode t) 
+  (hl-line-mode 0))
+#+end_src
+
+*** Main function
+#+begin_src elisp
+(define-minor-mode reader-mode
+  "Toggle 'reader-mode' functional on or off"
+  :interactive t
+  :init-value nil
+  (if (derived-mode-p 'org-mode)
+	 (if reader-mode
+		 (enable-reader-mode)
+	   (disable-reader-mode))
+	(progn
+	  (setq reader-mode nil)
+	  (message "You can use this minor-mode only in org-mode"))))
+
+(define-key org-mode-map (kbd "C-c r") 'reader-mode)
+#+end_src
+
+** Open bookmarks
+This should use =files= bookmark file from =$bookmarksPath= or
+=$standardBookmarksPath=
+
+#+begin_src elisp
+(defvar open-bookmark-file "~/Documents/bookmarks/emacs.dmenu-ignore"
+  "Bookmark file to open bookmark")
+
+(defun read-bookmark-file ()
+  "Run 'br' on bookmark file"
+  (let* ((file open-bookmark-file)
+		 (command (concat "br " open-bookmark-file)))
+	(if (file-exists-p open-bookmark-file)
+		(replace-regexp-in-string "'" ""
+								  (replace-regexp-in-string
+								   "\\\\ " " "
+								   (source-shell-script-run-command
+									"~/.config/scripts/functions.sh" command)))
+	  nil)))
+
+(defun open-bookmark ()
+  "Open selected file from (read-bookmark-file)"
+  (interactive)
+  (let* ((bookmark-file-contents (read-bookmark-file))
+		 (bookmark (if (not bookmark-file-contents)
+					   (error "Bookmark file: %s doesn't exist" open-bookmark-file)
+					 (ivy-read "Choose bookmark to open: "
+							   (split-string bookmark-file-contents "\n"))))
+		 (file (remove-prefix-to-first-space bookmark)))
+	(when file
+	  (find-file file))))
+
+(define-key evil-normal-state-map (kbd "<leader>Bo") 'open-bookmark)
+#+end_src
+
+** Bookmark major-mode
+#+begin_src elisp
+(defvar bookmark-mode-syntax-table
+  (let ((st (make-syntax-table)))
+    (modify-syntax-entry ?# "<" st)
+    (modify-syntax-entry ?\n ">" st)
+    st)
+  "Syntax table for 'bookmark-mode'")
+
+(defvar bookmark-indent-offset 18
+  "Indentation offset for 'bookmark-mode'")
+
+(defvar bookmark-align-column 18
+  "Column at which the second column should start in 'bookmark-mode'")
+
+(defun bookmark-align-line ()
+  "Align current line so the second column starts at 'bookmark-align-column'"
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (when (re-search-forward "^\\(\\S-+\\)\\s-*" (line-end-position) t)
+      (let* ((key (match-string 1))
+             (padding (max 1 (- bookmark-align-column (length key))))
+             (spaces (make-string padding ?\s)))
+        (replace-match (concat key spaces) t t)))))
+
+(define-derived-mode bookmark-mode fundamental-mode "bookmark"
+  "A major mode for editing Bookmark files"
+  :syntax-table bookmark-mode-syntax-table
+  (setq-local font-lock-defaults '((bookmark-font-lock-keywords))
+			  comment-start "#"
+              comment-end ""
+			  tab-width bookmark-indent-offset
+              indent-line-function #'bookmark-align-line)
+  (define-key bookmark-mode-map (kbd "TAB") #'bookmark-align-line))
+
+(defvar bookmark-font-lock-keywords
+  '(("TODO:" . font-lock-warning-face)
+    ("\\<\\(FIXME\\|BUG\\):" 1 font-lock-warning-face t)
+	("^!.*:" . font-lock-keyword-face)
+	)
+  "Highlighting expressions for `bookmark-mode'")
+
+(add-to-list 'auto-mode-alist '("\\.bookmark\\'" . bookmark-mode))
+#+end_src
+
+** Org-mode discipline
+*** Variables
+#+begin_src elisp
+(defvar org-discipline-xp-storage-file "~/.config/emacs/mine/.org-xp"
+  "Org-discipline storage for xp")
+
+(defvar org-discipline-prefix "M-o D"
+  "Org-discipline keybindings prefix")
+
+(defvar org-discipline-xp-sum 60
+  "Current amount of XP the user has accumulated")
+
+(defvar org-discipline-required-starting-xp 100
+  "Base amount of 'XP' required to level up in the discipline system.
+This value may increase with each level by 'org-discipline-xp-sum'")
+
+(defvar org-discipline-level 0
+  "Level in org-discipline. It automatically will be determined
+according to xp in 'org-discipline-xp-storage-file'")
+#+end_src
+
+*** Getters
+Get saved xp from file
+#+begin_src elisp
+(defun org-discipline-get-level (xp &optional do-print-information)
+  "Get level according to 'XP'. Print information if
+'DO-PRINT-INFORMATION' is not nil"
+  (let ((level 0)
+		(required org-discipline-required-starting-xp))
+	(while (>= xp required)
+	  (setq level (+ level 1)
+			required (+ required org-discipline-xp-sum)
+			xp (- xp org-discipline-xp-sum)))
+	(if do-print-information
+		(message " level: %d,  xp: %d,  required xp for new level: %d"
+				 level xp required)
+	  level)))
+
+(defun org-discipline-get-stored-xp ()
+  "Get xp from 'org-discipline-xp-storage-file' file location.
+If file doesn't exist, create it and write 0 to the file"
+  (interactive)
+  (unless (file-exists-p org-discipline-xp-storage-file)
+	(with-temp-buffer
+	  (insert "0")
+	  (write-region (point-min) (point-max) org-discipline-xp-storage-file)))
+  (let ((xp (string-to-number (read-file org-discipline-xp-storage-file))))
+	(if (called-interactively-p)
+		(org-discipline-get-level xp t)
+	  xp)))
+#+end_src
+
+Get skipped days in order to determine how much xp should be
+substracted
+#+begin_src elisp
+(defun org-discipline-get-skipped-days ()
+  "Substract current date and 'SCHEDULED'"
+  (interactive)
+  (let ((scheduled (org-get-scheduled-time nil)))
+    (if scheduled
+        (let* ((now (current-time))
+               (days (floor (/
+							 (float-time (time-subtract now scheduled)) 86400))))
+		  (when (called-interactively-p)
+			(if (< days 0)
+				(message "Days until the task: %d" (* days -1))
+			  (message "Skipped days: %d" days)))
+		  days)
+	  (when (called-interactively-p)
+		(error "No SCHEDULED timestamp found"))
+      0)))
+
+(define-key org-mode-map (kbd "M-o g s") 'org-discipline-get-skipped-days)
+#+end_src
+
+Get xp amount according to task difficulty in order to sum current
+xp or if task is skipped, substract by percentage according to
+difficulty
+#+begin_src elisp
+(defun org-discipline-get-difficulty-xp (difficulty)
+  "Get xp amount according to 'DIFFICULTY'"
+  (pcase (downcase difficulty)
+	("easy"   5)
+	("medium" 10)
+	("hard"   15)))
+
+(defun org-discipline-get-difficulty-xp-loss-percentage (difficulty days-skipped)
+  "Get xp loss percentage amount according to 'DIFFICULTY'"
+  (if (> days-skipped 0)
+	  (pcase (downcase difficulty)
+		("easy"   0.3)
+		("medium" 0.2)
+		("hard"   0.1))
+	0))
+
+(defun org-discipline-get-skipped-days-xp-loss-percentage (days-skipped)
+  "Get xp loss percentage amount according to skipped days.
+Skipped days have formula: current date - scheduled"
+  (cond
+   ((>= days-skipped 10) 0.3)
+   ((>= days-skipped 5) 0.2)
+   ((>= days-skipped 2) 0.1)
+   (t 0)))
+#+end_src
+
+*** Calculate
+#+begin_src elisp
+(defun org-discipline-calculate ()
+  "Sum stored stored xp according to ':DIFFICULTY' header property,
+then write to 'org-discipline-xp-storage-file' file. Depending on
+difficulty and days skipped count, you will lose xp and the easier
+task the more xp you will lose. And the longer you skipped the
+task, the more xp you will lose"
+  (let* ((xp (org-discipline-get-stored-xp))
+		 (difficulty (org-entry-get nil "DIFFICULTY" t))
+		 (profit (org-discipline-get-difficulty-xp difficulty))
+		 (skipped-days (org-discipline-get-skipped-days))
+		 (loss-skipped (org-discipline-get-skipped-days-xp-loss-percentage
+						skipped-days))
+		 (loss-difficulty (org-discipline-get-difficulty-xp-loss-percentage
+						   difficulty skipped-days))
+		 (loss (+ loss-difficulty loss-skipped)))
+	(if (> loss 0)
+		(- xp (* xp loss))
+	  (+ xp profit))))
+#+end_src
+
+*** Write changes to file
+#+begin_src elisp
+(defun org-discipline-calculate-write-to-file ()
+  "Calculate and redirect result to 'org-discipline-xp-storage-file'"
+  (let ((calculated-xp (org-discipline-calculate)))
+	(with-temp-file org-discipline-xp-storage-file
+	  (insert (number-to-string calculated-xp)))))
+#+end_src
+
+*** Hook function
+#+begin_src elisp
+(defun org-discipline-calculation-on-todo-write-file ()
+  "Calculate xp according to ':DIFFICULTY' and skipped days.
+If loss >= 0, xp from 'org-discipline-xp-storage-file' will be
+substracted by summary loss percentage of xp. Otherwise, you will
+get profit"
+  (when (and (equal org-state "DONE") (org-entry-get nil "DIFFICULTY" t))
+	(org-discipline-calculate-write-to-file)
+	;; Dumb shit, but i don't know how to print it after "Entry repeats: ..."
+	(run-at-time 0.01 nil
+				(lambda ()
+				(call-interactively 'org-discipline-get-stored-xp)))))
+#+end_src
+
+*** Define minor-mode
+#+begin_src elisp
+(define-minor-mode org-discipline-mode
+  "Toggle 'org-discipline-mode' functional on or off"
+  :global t
+  :interactive t
+  :keymap
+  (list
+   (cons (pkbd org-discipline-prefix "m") #'org-discipline-get-stored-xp)
+   (cons (pkbd org-discipline-prefix "S") #'org-discipline-get-skipped-days)
+   )
+
+  (let ((target-hook 'org-after-todo-state-change-hook)
+		(function 'org-discipline-calculation-on-todo-write-file))
+	(if (eq org-discipline-mode nil)
+		(remove-hook target-hook function)
+	  (add-hook target-hook function t))
+	)
+  )
+#+end_src

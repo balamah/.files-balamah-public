@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: use-package-straight
+# key: (suse)
+# --
+
+(use-package ${1:package name}
+  :ensure t
+  :straight (${1}
+			 :host ${2:host}
+			 :repo "${3:repo}")$0)

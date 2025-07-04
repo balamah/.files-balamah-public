@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: bookmark-include
+# key: include:
+# --
+
+!INCLUDE: $0

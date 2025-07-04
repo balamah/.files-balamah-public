@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cat ~/.config/scripts/resources/dmenu/emoji-list | sed "/^$/d;/#/d" | \
+	dmenu -p "󰞅 Choose emoji to copy" -i -l 20 | awk '{print $1}' | \
+	xargs -I "%" ~/.config/scripts/notify-send-copy "${0##*/}" \
+	"Emoji % copied to clipboard" "%"

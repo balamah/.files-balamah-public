@@ -1,0 +1,12 @@
+#!/bin/bash
+
+. ~/.files-balamah/install/modules/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+echo "$flatpakRWprograms" | sed 's/,/\n/g' | \
+	while read program; do
+		echo "$flatpakRWdirectories" | sed 's/,/\n/g' | \
+			while read catalog; do
+				flatpakPermission "$program" "$catalog" --reset
+			done
+	done

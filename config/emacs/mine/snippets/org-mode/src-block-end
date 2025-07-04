@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: src-block-end
+# key: <E
+# --
+
+#+end_src

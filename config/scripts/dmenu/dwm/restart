@@ -1,0 +1,6 @@
+#!/bin/sh
+
+notify-send "${0##*/}" "This will place some windows on first tag"
+decision=$(printf "no\nyes" | dmenu -p ' Are you sure you want to restart dwm?')
+
+[ "$decision" = 'yes' ] && pgrep -x dwm | xargs kill -HUP

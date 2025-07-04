@@ -1,0 +1,36 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+[ "$createHome" != 'yes' ] && exit
+
+clone() {
+	[ -z "$1" ] && echo '$1 - repo name. $2 - be path' && return 1
+
+	git clone git@github.com:balamah/$1 "$2"
+}
+
+create() {
+	[ -z "$1" ] || [ -z "$2" ] && echo '$1 is root. Rest are directories to create' && \
+		return 1
+
+	[ -d "$1/*" ] && return
+
+	root="$1" && shift
+	for i in "$@"; do
+		mkdir -p $root/$i
+	done
+}
+
+[ ! -s ~/.alarms ] && echo "# time - message" > ~/.alarms
+
+create "$HOME" Documents Downloads Images JIC
+
+create "$HOME/Transfer" documents/school-books send other images
+create "$HOME/Video" recorded/footages ffmpeg
+
+create "$HOME/Tools" make suckless
+create "$HOME/Coding" learning projects
+
+clone 'org-files' "$HOME/Org"
+clone 'leetcode-problems' "$HOME/Coding/leetcode-problems"

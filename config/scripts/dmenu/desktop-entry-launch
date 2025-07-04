@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+echo "$desktopEntriesDirectories" | sed 's/,/\n/g' | \
+	while read directory; do
+		find "$directory" -name "*.desktop"
+	done | \
+		sed 's@.*/@@g;s/.desktop$//g;/^$/d' | sort | uniq | \
+		dmenu -i -p " Launch desktop entry" | xargs ~/.config/scripts/launch

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+distro=$(~/.config/scripts/get/distro/name)
+
+case "$distro" in
+	"void") xbps-install -un | wc -l                             ;;
+	"arch") pacman -Qu | wc -l                                   ;;
+	"debian") apt list --upgradable | wc -l                      ;;
+	"gentoo") emerge --update --pretend --verbose @world | wc -l ;;
+esac

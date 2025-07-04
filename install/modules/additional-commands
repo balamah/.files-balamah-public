@@ -1,0 +1,54 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+userPackages="$packagesList/user-packages"
+
+case "$distro" in
+    "arch")
+        git clone https://aur.archlinux.org/yay /tmp/yay && cd /tmp/yay && makepkg -si
+        cat $userPackages/arch/aur-packages | xargs yay -S --noconfirm 
+        ;;
+    "debian")
+        sudo dpkg -i $userPackages/debian/*
+		cargo install xcolor
+        ;;
+
+	"gentoo")
+		sudo ebuild $userPackages/gentoo/*.ebuild clean test install
+		;;
+esac
+
+# create some useful files and directories
+mkdir ~/.emacs.d/backups
+touch ~/.config/shell/zsh/local-aliases.zsh
+
+# run commands for dark theme and default browser
+gsettings set org.cinnamon.desktop.default-applications.terminal exec st
+gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark
+gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+xdg-settings set default-web-browser firefox.desktop
+
+# run commands to make some programs work
+python3 -m pywalfox install
+
+# make spotify container see spotify-adblock
+flatpak override --user \
+		--filesystem="~/.spotify-adblock/spotify-adblock.so" \
+		--filesystem="~/.config/spotify-adblock/config.toml" com.spotify.Client
+
+# install zsh plugin manager
+bash -c \
+	 "$(curl --fail --show-error --silent --location \
+		https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh
+		)"
+
+# apply zathura config.
+# In zathura config, you can't use $HOME, ~ and user things to execute
+# your scripts, you have to use sucking /home/username which can't be
+# the same on other systems
+~/.config/scripts/additional/generate-zathura-pywal > ~/.config/zathura/zathurarc 
+
+# install tmux plugin manager
+[ "$enableTmuxPlugins" = 'yes' ] && \
+	git clone https://github.com/tmux-plugins/tpm ~/.local/bashare/tmux/plugins/tpm

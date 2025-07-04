@@ -1,0 +1,18 @@
+xorg xinit numlockx slock
+libx11-dev libxft-dev libxinerama-dev build-essential
+libx11-xcb-dev libxcb-res0-dev
+xdg-desktop-portal xdg-desktop-portal-gtk
+fontconfig python3-pip
+xcompmgr
+screenkey
+xdotool xclip acpi
+feh playerctld
+lxappearance breeze-icon-theme
+dbus libgtk-3-common libgtk-4-common
+libwebkit2gtk-4.0-dev
+mpv sxiv zathura file-roller
+ranger neovim emacs htop
+dunst cmatrix
+policykit-1-gnome gnome-keyring
+pipewire pipewire-pulse wireplumber pamixer pavucontrol
+flameshot flatpak firefox jq

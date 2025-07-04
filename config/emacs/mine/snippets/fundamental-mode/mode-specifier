@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: mode-specifier
+# key: mode:::
+# --
+
+# -*- mode: $0 -*-

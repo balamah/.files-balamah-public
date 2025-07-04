@@ -1,0 +1,48 @@
+! -*- mode: conf-xdefaults -*-
+
+dwm.color0:     #2E3440
+dwm.color1:     #D8DEE9
+dwm.color6:     #88C0D0
+dwm.color14:    #D8DEE9
+
+dmenu.color0:   #2E3440
+dmenu.color6:   #88C0D0
+dmenu.color14:  #88C0D0
+
+*color0:        #2E3440
+*color1:        #BF616A
+*color2:        #A3BE8C
+*color3:        #EBCB8B
+*color4:        #81A1C1
+*color5:        #B48EAD
+*color6:        #88C0D0
+*color7:        #D8DEE9
+*color8:        #4C566A
+*color9:        #BF616A
+*color10:       #A3BE8C
+*color11:       #EBCB8B
+*color12:       #81A1C1
+*color13:       #B48EAD
+*color14:       #8FBCBB
+*color15:       #ECEFF4
+*color66:       #2E3440
+					  
+st.color0:      #2E3440
+st.color1:      #BF616A
+st.color2:      #A3BE8C
+st.color3:      #EBCB8B
+st.color4:      #81A1C1
+st.color5:      #B48EAD
+st.color6:      #88C0D0
+st.color7:      #D8DEE9
+st.color8:      #4C566A
+st.color9:      #BF616A
+st.color10:     #A3BE8C
+st.color11:     #EBCB8B
+st.color12:     #81A1C1
+st.color13:     #B48EAD
+st.color14:     #8FBCBB
+st.color15:     #ECEFF4
+st.background:  #2E3440
+st.foreground:  #D8DEE9
+st.cursorColor: #D8DEE9

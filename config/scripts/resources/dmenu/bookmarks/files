@@ -1,0 +1,40 @@
+# -*- mode: bookmark -*-
+!COMMAND: emacsclient -s default -c -a 'bookmark'
+
+# home
+ha                ~/.alarms
+hzr               ~/.zshrc
+hzh               ~/.zsh_history
+
+# config      
+cbb               ~/.config/compile/dwmblocks/blocks.h
+cdc               ~/.config/compile/dwm/config.h
+css               ~/.config/sxiv/exec/key-handler
+csx               ~/.config/sxhkd/sxhkdrc
+crr               ~/.config/ranger/rc.conf
+crR               ~/.config/ranger/rifle.conf
+crs               ~/.config/ranger/scope.sh
+csa               ~/.config/shell/aliases.sh
+cp                ~/.config/picom/picom.conf
+cz                ~/.config/zathura/zathurarc.base
+cz                ~/.config/zathura/zathurarc.base
+ct                ~/.config/tmux/tmux.conf
+Dss               ~/.files-balamah/settings.conf
+Dsp               ~/.files-balamah/py-scripts.ini
+em                ~/.files-balamah/config/emacs/mine/editor-config.org
+
+# resources   
+ra                ~/.config/scripts/resources/dmenu/applications
+rd                ~/.config/scripts/resources/dmenu/daemons
+re                ~/.config/scripts/resources/dmenu/emoji-list
+
+# bookmark files
+!ALL: | ~/.config/scripts/resources/dmenu/bookmarks | f | * | B
+
+# recent
+Rc                /tmp/.files-balamah/recent/calculator
+Rv                /tmp/.files-balamah/recent/copy-text
+Rs                /tmp/.files-balamah/recent/currency-convert
+Rl                /tmp/.files-balamah/recent/layout-converter
+Rj                /tmp/.files-balamah/recent/lisp-case-text-format
+Rp                /tmp/.files-balamah/recent/crypt

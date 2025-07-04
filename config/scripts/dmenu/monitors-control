@@ -1,0 +1,73 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+options="duplicate
+extend
+move monitor"
+
+option=$(echo "$options" | dmenu -p "󰙁 Choose monitors action" | awk '{print $1}')
+
+[ -z "$option" ] && exit
+
+getDirectionFlag() {
+	case "$1" in
+		"left")		echo "--left-of"	;;
+		"right")	echo "--right-of"	;;
+		"up")		echo "--above"		;;
+		"down")		echo "--below"		;;
+		*)          return 1			;;
+	esac
+}
+
+getMonitors() {
+	xrandr | grep " connected" | awk '{print $1}'
+}
+
+duplicate() {
+	getMonitors | \
+		while read port; do
+			[ "$port" = "$primaryMonitorPort" ] && continue
+
+			echo "mirroring $port to $primaryMonitorPort"
+
+			xrandr --output "$port" --same-as "$primaryMonitorPort"
+		done
+}
+
+extend() {
+	lastPort="$primaryMonitorPort"
+	direction=$(getDirectionFlag "$defaultExtendDirection")
+	getMonitors | \
+		while read port; do
+			[ "$port" = "$primaryMonitorPort" ] && continue
+
+			eval xrandr --output "$port" --auto "$direction" "$lastPort"
+
+			lastPort="$port"
+		done
+}
+
+move() {
+	portToMove=$(getMonitors | dmenu -p "󰍹 Choose port to move")
+    [ -z "$portToMove" ] && exit
+
+	selectedDirection=$(printf "up\ndown\nleft\nright" | \
+							dmenu -p "󰁁 Choose direction to move")
+    [ -z "$selectedDirection" ] && exit
+
+	port=$(getMonitors | sed "/$portToMove/d" | \
+			   dmenu -p "󰍹 Choose port according to which chosen port will be moved")
+    [ -z "$port" ] && exit
+
+	direction=$(getDirectionFlag "$selectedDirection")
+
+	eval xrandr --output "$portToMove" --auto "$direction" "$port"
+}
+
+case "$option" in
+	"duplicate")	 duplicate	;;
+	"extend")		 extend		;;
+	"move")			 move		;;
+	*)               exit       ;;
+esac

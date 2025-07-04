@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: main
+# key: main()
+# --
+
+public class `(file-name-sans-extension (file-name-nondirectory buffer-file-name))` {
+	public static void main(String[] args) {
+		$0
+	}
+}

@@ -1,0 +1,11 @@
+󰀠 alarm                my simple alarm daemon
+󰌌 keyboard             apply keyboard config
+󰌌 ckeyboard            choose keyboard config and apply
+󰌌 warpd                mouse emulation via keyboard
+󰗘 picom                compositor
+󰹉 sekiro fps unlock    thing that mades sekiro more playable
+ emacs                emacs daemon
+ profile emacs        choose emacs config and launch daemon of it
+󰍡 dunst                notification daemon
+󰪎 internet wait        daemon that notifies if internet appeared
+󱖫 panel indicators     dwm status bar script

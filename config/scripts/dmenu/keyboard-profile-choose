@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+profile=$(find "$keyboardProfilesDirectory" -type f -executable | sed 's@.*/@@' | \
+	   dmenu -p '󰌌 Choose keyboard profile to start')
+
+[ -z "$profile" ] && exit
+
+bash "$keyboardProfilesDirectory/$profile" && \
+	notify-send "${0##*/}" "successfully applied $profile" || \
+	notify-send "${0##*/}" "failed to apply $profile"

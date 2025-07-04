@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: math-function-call
+# key: yfx()
+# --
+
+for i in ${1:what-to-cycle}:
+	try:
+		$0
+	except ZeroDivisionError:
+		pass

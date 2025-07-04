@@ -1,0 +1,19 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf 
+
+systemd() {
+	cat $servicesListPath/systemd/startup | \
+		while read service; do
+			sudo systemctl enable $service
+		done
+}
+
+openrc() {
+	cat $servicesListPath/openrc/startup | \
+		while read service; do
+			sudo rc-update add $service default
+		done
+}
+
+eval "$initSystem"

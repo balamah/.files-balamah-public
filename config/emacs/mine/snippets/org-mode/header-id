@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: header-id
+# key: id:::
+# --
+
+:PROPERTIES:
+:CUSTOM_ID: $0
+:END:

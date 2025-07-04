@@ -1,0 +1,30 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf
+
+sxhkdStartProfile() {
+	case "$profile" in
+		"bspwm") sxhkd -c ~/.config/sxhkd/sxhkdrc-bspwm ;;
+		"no-wm") sxhkd -c ~/.config/sxhkd/sxhkrc-de     ;;
+		*) sxhkd ;;
+	esac
+}
+
+sxhkdStartCustom() {
+	sxhkd -c "$customSxhkdrc"
+}
+
+sxhkdStart() {
+	[ "$enableCustomSxhkdrc" = 'yes' ] && sxhkdStartCustom || sxhkdStartProfile
+}
+
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+pgrep -x sxhkd > /dev/null || sxhkdStart &
+~/.local/bin/warpd &
+clipmenud &
+gummy start
+flameshot &
+dunst &
+
+[ "$profile" != 'exwm' ] && [ "$enableEmacsDaemon" = 'yes' ] && \
+	emacs --with-profile default --daemon=default --debug-init &

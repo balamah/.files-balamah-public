@@ -1,0 +1,10 @@
+#!/bin/sh
+
+case $BUTTON in
+	1) ~/.config/scripts/dmenu/shutdown shutdown ;;
+	2) ~/.config/scripts/dmenu/powermenu         ;;
+	3) ~/.config/scripts/dmenu/shutdown reboot   ;;
+esac
+
+awk '{printf("%d:%02d:%02d\n",($1/60/60/24),($1/60/60%24),($1/60%60),($1%60))}'\
+	/proc/uptime

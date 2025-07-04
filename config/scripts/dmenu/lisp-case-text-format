@@ -1,0 +1,27 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh
+
+text=$(cat /tmp/.files-balamah/recent/lisp-case-text-format | \
+	sort | uniq | dmenu -p "󰀊 Enter text to format to lisp case" | rip)
+
+[ -z "$text" ] && exit || \
+	echo "$text" >> /tmp/.files-balamah/recent/lisp-case-text-format
+
+date=$(date +'%d%m%Y')
+ndate=$(date -d tomorrow +"%d%m%Y")
+sqlDate=$(date +'%Y-%m-%d')
+sqlDatetime=$(date +'%Y-%m-%d %H:%M')
+time=$(date +'%H%M')
+
+output=$(echo "$text" | awk '{print tolower($0)}' | \
+	sed "s/,//g;
+         s/ /-/g;
+         s/:date/$date/g;
+         s/:time/$time/g;
+         s/:ndate/$ndate/g;
+         s/:sql-datetime/$sqlDatetime/g;
+         s/:sql-date/$sqlDate/g;
+         s/_/-/g")
+
+~/.config/scripts/notify-send-copy "${0##*/}" "$output" "$output"

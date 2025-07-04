@@ -1,0 +1,5 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+~/.config/scripts/startup/10-keyboard-config $layouts,gr

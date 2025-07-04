@@ -1,0 +1,314 @@
+# Installation
+## You can see distros available in directory install/pkg-list.
+## The option determines which package manager to use and
+## which packages to install
+distro=arch
+
+## Flatpak stuff
+flatpakRWpermission=yes
+flatpakRWdirectories=Video,Documents,Images,Downloads,Org/images,Transfer,Share,Projects,PycharmProjects,/run/media/"$USER",Music/spotify
+flatpakRWprograms=com.discordapp.Discord,org.telegram.desktop,com.viber.Viber,com.spotify.Client,org.onlyoffice.desktopeditors
+
+## Init system
+initSystem=systemd
+
+## Custom installation script
+enableCustomInstallationScript=no
+customInstallationScriptPath=~/.local/bin/scripts/install
+
+## Create xsession for display manager users
+createXsession=no
+
+## Delete junk.
+## This will delete all linked recursive directories
+deleteJunk=yes
+
+## Link files for /etc/ and /usr/
+linkSystemFiles=yes
+
+## Profile determines which packages to install.
+## Also it is option to choose window manager.
+## Here are available profiles:
+## - bspwm
+## - dwm
+## - exwm
+## - xmonad
+##   This profile is for servers or desktop environments
+## If you changed your profile, you need to run command
+## `dots install-profile-packages`
+profile=dwm
+
+## If set to yes, installation script will create my home structure.
+## Here is directory structure
+## $HOME
+## ├── Coding
+## │   ├── learning
+## │   ├── leetcode-problems
+## │   └── projects
+## ├── Documents
+## ├── Downloads
+## ├── Images
+## ├── JIC
+## ├── Org
+## ├── Tools
+## │   ├── make
+## │   └── suckless
+## ├── Transfer
+## │   ├── books-send
+## │   ├── documents
+## │   │   └── school-books
+## │   ├── images
+## │   ├── other
+## │   └── school
+## └── Video
+##     └── recorded
+##         └── footages
+createHome=no
+
+## It clones my wallpaper repo: https://github.com/balamah/wallpapers.
+## WARNING: it has weight over 600 MB
+cloneWallpaperRepo=no
+
+## If you don't like aur, you can forbid installer to install aur
+## packages
+installAurPackages=yes
+
+## Tmux
+enableAutoTmux=no
+enableTmuxPlugins=yes
+
+# Directories
+standardBookmarksPath=~/.config/scripts/resources/dmenu/bookmarks/
+bookmarksPath=~/Documents/bookmarks
+keyboardProfilesDirectory=~/.config/scripts/resources/dmenu/keyboard-profiles
+minecraftConfigsPath=~/.config/scripts/resources/dmenu/minecraft-configs
+minecraftDirectory=~/.minecraft/
+minecraftSandboxDirectory=~/.firejail/.minecraft/
+packagesList=~/.files-balamah/install/pkg-list
+wslPackagesList=~/.files-balamah/install/pkg-list/wsl/
+servicesListPath=~/.files-balamah/install/services
+vpnWireguardPath=~/.config/scripts/resources/dmenu/wireguard
+wallpapersPath=~/Images/wallpapers/src/
+sxwDirectory=~/.files-balamah/config/compile/sxw
+
+## Local startup scripts.
+## Sometimes can be quite useful
+enableLocalStartupScripts=no
+localStartupScripts=~/Tools/scripts/startup/
+
+# Cron
+## Exercises
+### If exercises quantity is smaller than this variable,
+### notification won't be sent
+minimumQuantity=20
+
+## Notification settings
+### Don't disturb time.
+### After time that is set here, cron won't send any notifications
+enableCronNotifications=yes
+enableDNDtime=yes
+DNDtimeBegin=21:45
+DNDtimeEnd=0:30
+
+## If set to yes, cron will send you notification to wash the nose
+runnyNose=no
+
+## In autumn or winter my hands, lips and face wither which is painful.
+## Therefore i need notification to smear my arms with some cream
+witherHands=no
+witherFace=no
+witherLips=no
+
+### Don't worry, if many notifications appear, just use this variable
+witherEverything=no
+
+## Sometimes i can have blood leaks due of withered nose.
+## If set to yes, it will send notification to moisten nose
+witherNose=no
+
+# Startup
+## Compositor
+enablePicom=yes
+
+### Available picoms are here:
+### - ftlabs
+### - pijulius
+### - pijulius-1
+### To update picom, kill the process and launch
+### picom daemon from daemon-launcher
+picom=pijulius
+
+### If set to yes, it will restart picom in wal-sync no matter what
+picomRestartSameColorscheme=no
+
+## Panel indicators
+### There are 2 variations:
+### - dwmblocks
+### - shell :: this will use my script for setting xsetroot
+panelIndicatorsVariation=dwmblocks
+
+### Good delimeters are: |  .
+### Unfortunately, changing this variable affects only shell version dwmblocks.
+### To affect dwmblocks, you need to change delim[] in blocks.h
+panelIndicatorsDelimeter=""
+
+## Wallpapers
+enableWallpapers=yes
+enableRandomWallpapers=yes
+
+## sxhkd
+enableCustomSxhkdrc=no
+customSxhkdrc=~/.local/sxhkdrc
+
+## Limit wallpaper list to bright wallpapers if time < 17:00
+## Useful in situations when you live in apartment without curtains,
+## and you want to use pywal colorscheme.
+## If you don't want to use pywal colorscheme, change therefore $colorscheme
+enableBrightWallpapersMorning=no
+
+brightWallpapersLimitTime=17:00
+
+## Keyboard config
+enableKeyboardConfig=yes
+
+### Symbol repetitions
+symbolRepetitionDelay=220
+symbolRepetitionRate=25
+
+### Numlock
+enableNumlockStart=yes
+
+### Layouts list for 10-keyboard-config startup script.
+### You can get layouts after 184 line in file
+### /usr/share/X11/xkb/rules/base.lst
+### To update keyboard config in session,
+### select from daemon-launcher keyboard config
+layouts=us,ua
+
+### Change layout method.
+### - sxhkd
+### - xinit :: better when you want to use dmenu and change layouts using s-SPC
+layoutMethodChange=xinit
+
+## Openrgb
+enableOpenrgb=no
+openrgbProfile=normal-profile.orp
+
+## Enable emacs daemon at start.
+## Idk why do you want to disable emacs daemon,
+## emacs daemon is efficient usage.
+## But i will leave just for fun
+enableEmacsDaemon=yes
+
+# Emacs config
+emacsConfigs=~/.config/emacs/
+emacsProfiles=$emacsConfigs/profiles.el
+emacsEnableTetris=no
+emacsEnableOrgTrello=yes
+emacsEnableWarnings=yes
+emacsEnableOldVersionConfig=no
+
+## Preserve directories.
+## When enabled projectile-mode, it makes some file names ugly, like
+## Org/tasks.org --> Org/../../data/Org/tasks.org .
+## Be careful, if you fix it globally, it may create some issues
+emacsFileSymlinkPreserve=no
+emacsFileSymlinkPreserveDirectories=~/Org
+emacsFileGlobalSymlinkPreserve=no
+
+## Alternate theme for function `ewal-mode`.
+## Enter theme from emacs theme list.
+## If you don't want other theme, set this variable to `current`
+emacsAlternateTheme=current
+
+## Here are available options for emacs dashboard
+## - buttons
+## - doom
+## - elements
+emacsDashboardOption=buttons
+
+## When you use LaTeX and snippets, it gives company-mode completion,
+## and it requires precise match, annoying shit.
+## Not recommended setting to yes
+emacsEnableCompanySnippetsLaTeX=no
+
+## This is configuration for org presentation export script,
+## which is ~/.config/scripts/emacs/org-presentation-export
+emacsOPEcopyOutputPath=yes
+emacsOPEworkdir=/tmp/org-presentation-export/
+emacsOPEoutputdir=~/Documents/school/presentations/mine/pdf
+
+# Appearance
+## Sync with desktop colors.
+## If you use other color schemes and this variable is set to yes,
+## programs will have colorscheme with colorscheme you set
+enablePywal=yes
+
+## Colorscheme.
+## Available colorschemes are located in ~/.config/colorschemes (pywal is exception).
+## After changing this variable, press s-<F5> to update colorscheme,
+## or just logout and login for better result
+colorscheme=pywal
+
+### If set to value `current`, it will set your desktop wallpaper as
+### background for telegram. Otherwise, it should be file path to
+### image that you want to set as background
+telegramBackground=current
+enablePywalTelegramBackground=no
+
+### When set to no, programs won't render transparency with other colorschemes
+### except pywal
+transparencyWithoutPywal=no
+
+# Scripts
+## Kill programs list.
+## You need to enter process name of programs.
+## Useful in situations when you want to watch movie,
+## and you need to kill all programs with notifications fast
+killProgramsList=firefox,telegram-desktop,Discord
+
+## Monitors control
+primaryMonitorPort=HDMI-A-0
+defaultExtendDirection=left
+
+### Sometimes programs can't be killed using `pkill -f`.
+### And they need to be killed using `killall -9`
+hardKillProgramsList=Viber
+
+## Widgets
+offsetx=1920
+
+## Get scripts
+### When set to yes, it will show error when wego doesn't work
+getWeatherClickError=no
+
+## Multimedia and volume
+### app-audio-control
+appRewindAmount=5
+appRadicalRewindAmount=20
+appVolumeAmount=0.1
+appLoopStages=None,Playlist,Track
+
+### volume-control
+volumeAmount=5
+
+#### WARNING: not recommended changing to `no`.
+#### For you can raise volume up to 1000%
+#### which will make your ears hurt
+enableLimitVolume=yes
+
+## connection-test website.
+## Changing it can be useful if site is down
+connectionTestWebsite=gnu.org
+
+## Launch spotify with adblocker as flatpak
+enableSpotifyFlatpak=yes
+
+## Webcam launch
+videoSize=946x509
+
+## Desktop entries
+desktopEntriesDirectories=/usr/share/applications,/var/lib/flatpak/exports/share/applications 
+
+## Bookmarks script
+enableBookmarksALLexpression=yes

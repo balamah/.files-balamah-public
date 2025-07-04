@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: bible-verse-explanation
+# key: verse:::
+# --
+
+*** ${1:Verse}
+:PROPERTIES:
+:CUSTOM_ID: ${2:Book} ${1}
+:END:
+
+$0

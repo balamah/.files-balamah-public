@@ -1,0 +1,47 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+[ "$enablePicom" = 'no' ] && exit
+
+isApplyTransparency() {
+	[ "$colorscheme" = 'pywal' ] || [ "$transparencyWithoutPywal" = 'yes' ] && return 0
+}
+
+pijulius() {
+	if isApplyTransparency; then
+		~/.local/bin/picom/pijulius-picom \
+			--vsync -b \
+			--animations --animation-window-mass 0.5 \
+			--animation-for-open-window zoom \
+			--animation-stiffness 500
+	else
+		~/.local/bin/picom/pijulius-picom \
+			--vsync -b \
+			--animations --animation-window-mass 0.5 \
+			--animation-for-open-window zoom \
+			--animation-stiffness 500 \
+			--config ~/.config/picom/picom-no-transparency.conf
+	fi
+}
+
+ftlabs() {
+	if isApplyTransparency; then
+		~/.local/bin/picom/ftlabs-picom -b \
+			--animations --animation-window-mass 0.5 \
+			--animation-for-open-window zoom --animation-stiffness-in-tag 500
+	else
+		~/.local/bin/picom/ftlabs-picom -b \
+			--animations --animation-window-mass 0.5 \
+			--animation-for-open-window zoom --animation-stiffness-in-tag 500 \
+			--config ~/.config/picom/picom-no-transparency.conf 
+		fi
+}
+
+pijulius-1() {
+	isApplyTransparency && \
+		~/.local/bin/picom/pijulius-picom-1 || \
+		~/.local/bin/picom/pijulius-picom-1 --config ~/.config/picom/picom-no-transparency.conf 
+}
+
+eval "$picom"

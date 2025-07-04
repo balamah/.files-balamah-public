@@ -1,0 +1,13 @@
+#!/bin/sh
+
+case $BUTTON in
+	1) ~/.config/scripts/app-audio-control previous ;;
+	2) setsid -f pavucontrol                        ;;
+	3) ~/.config/scripts/app-audio-control next     ;;
+	4) ~/.config/scripts/volume-control up			;;
+	5) ~/.config/scripts/volume-control down		;;
+esac
+
+[ "$(pamixer --get-mute)" = 'true' ] && icon="" || icon=""
+
+echo -n "$icon " && ~/.config/scripts/get/volume-amount

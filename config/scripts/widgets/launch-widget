@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# $1 :: widget script path
+
+. ~/.files-balamah/config/scripts/functions.sh 
+
+[ -z "$1" ] && printParameters && exit 1
+
+state=$(toggle On,Off "/tmp/.files-balamah/widgets/${1##*/}")
+
+[ "$state" = 'Off' ] && (bash "$1" &) || ~/.config/scripts/widgets/kill-widgets "$1"

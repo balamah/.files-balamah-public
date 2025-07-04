@@ -1,0 +1,28 @@
+#!/bin/bash
+
+. ~/.files-balamah/config/scripts/functions.sh
+
+currencyQuery=$(cat /tmp/.files-balamah/recent/currency-convert | \
+	sed "/^$/d" | sort | uniq | \
+	dmenu -p " Enter currency convert query (amount from to)" | \
+	tr '[:lower:]' '[:upper:]' | rip | sed "s/Z/000/g")
+
+IFS=' ' read -ra currencyQueryArray <<< "$currencyQuery"
+amount=${currencyQueryArray[0]}
+currency=${currencyQueryArray[1]}
+currencyToConvert=${currencyQueryArray[2]}
+
+[ -z "$currency" ] || [ -z "$currencyToConvert" ] && exit 1
+
+rate=$(curl -s "https://api.exchangerate-api.com/v4/latest/$currency" | \
+		   jq -r ".rates[\"$currencyToConvert\"]")
+convertedAmount=$(echo "$amount * $rate" | bc)
+
+result=$(echo "$convertedAmount $currencyToConvert" | 
+         tr "[:upper:]" "[:lower:]")
+
+[ -z "$result" ] && exit || \
+	echo "$currencyQuery" | tr '[:upper:]' '[:lower:]' >> \
+							/tmp/.files-balamah/recent/currency-convert
+
+~/.config/scripts/notify-send-copy "${0##*/}" "$result" "$result"

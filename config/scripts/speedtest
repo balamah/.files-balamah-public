@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# To hide ip, make $1 equal to --iphide
+
+speedtestCommand() {
+	speedtest --share
+}
+
+[ "$1" = '--iphide' ] && \
+	speedtestCommand | sed -E 's/\b([0-9]{1,3}\.){3}[0-9]{1,3}\b/[REDACTED]/g' || \
+		speedtestCommand
+
+read -p "Press enter to exit"

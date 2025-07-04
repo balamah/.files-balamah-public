@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: array push
+# key: push()
+# --
+
+array_push(${1:array}, ${2:value});

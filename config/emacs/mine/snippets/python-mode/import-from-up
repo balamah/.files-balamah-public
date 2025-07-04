@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: import-from-up
+# key: import..
+# --
+
+import sys
+import os
+
+# python sucks
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))

@@ -1,0 +1,218 @@
+# quit/restart bspwm
+super + alt + r
+	bspc wm -r
+
+super + shift + q
+	~/.config/scripts/dmenu/bspwm/logout
+
+# close and kill
+super + shift + c
+	bspc node -c
+
+# alternate between the tiled and monocle layout
+super + m
+	bspc desktop -l next
+
+# send the newest marked node to the newest preselected node
+super + y
+	bspc node newest.marked.local -n newest.!automatic.local
+
+# swap the current node and the biggest window
+super + g
+	bspc node -s biggest.window
+
+#
+# state/flags
+#
+
+# set the window state
+super + {t,shift + t,s,f}
+	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+
+# set the node flags
+super + ctrl + {m,x,y,z}
+	bspc node -g {marked,locked,sticky,private}
+
+#
+# focus/swap
+#
+
+# focus the node in the given direction
+super + {_,shift + }{h,j,k,l}
+	bspc node -{f,s} {west,south,north,east}
+
+# focus the node for the given path jump
+super + {p,b,comma,period}
+	bspc node -f @{parent,brother,first,second}
+
+# focus the next/previous window in the current desktop
+# super + {_,shift + }c
+	# bspc node -f {next,prev}.local.!hidden.window
+
+# focus the next/previous desktop in the current monitor
+super + bracket{left,right}
+	bspc desktop -f {prev,next}.local
+
+# focus the last node/desktop
+super + {grave,Tab}
+	bspc {node,desktop} -f last
+
+# focus the older or newer node in the focus history
+super + {o,i}
+	bspc wm -h off; \
+	bspc node {older,newer} -f; \
+	bspc wm -h on
+
+# focus or send to the given desktop
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
+
+#
+# preselect
+#
+
+# preselect the direction
+super + ctrl + shift + alt + {h,j,k,l}
+	bspc node -p {west,south,north,east}
+
+# preselect the ratio
+super + ctrl + {1-9}
+	bspc node -o 0.{1-9}
+
+# cancel the preselection for the focused node
+super + ctrl + space
+	bspc node -p cancel
+
+# cancel the preselection for the focused desktop
+super + ctrl + shift alt + Escape
+	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+
+#
+# move/resize
+#
+
+# expand a window by moving one of its side outward
+super + shift + ctrl + {h,j,k,l}
+	bspc node -z {left -60 0,bottom 0 60,top 0 -60,right 60 0}
+
+# contract a window by moving one of its side inward
+super + ctrl + alt + shift + {h,j,k,l}
+	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
+
+# move a floating window
+super + {Left,Down,Up,Right}
+	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+# reload sxhkd configuration file
+super + Escape
+	pkill -USR1 -x sxhkd ;\
+	notify-send 'sxhkd' "sxhkd has been restarted"
+
+# Default sxhkdrc
+
+# terminal
+super + shift + Return
+	~/.local/bin/tabbed-st
+
+# Notify layout change
+super + space
+	~/.config/scripts/notify-keymap-change
+
+# Clipboard
+super + control + shift + v; v
+	clipmenu
+
+super + control + shift + v; d
+	clipdel -d "$(echo -n "$1")" && \
+		notify-send 'clipmenu' "clipboard has cleared"
+
+super + control + shift + v; c
+	~/.config/scripts/dmenu/copy-text
+
+# dmenu
+super + r
+	~/.config/scripts/dmenu/desktop-entry-launch
+
+super + shift + r
+	~/.config/scripts/dmenu/command-launch
+
+# volume
+XF86AudioMicMute
+	pactl set-source-mute @DEFAULT_SOURCE@ toggle
+
+XF86AudioMute
+	~/.config/scripts/volume-control mute
+
+XF86Audio{Lower,Raise}Volume
+	~/.config/scripts/volume-control {down,up}
+
+# multimedia
+XF86Audio{Play,Prev,Next}
+	~/.config/scripts/app-audio-control {play-pause,previous,next}
+
+shift + XF86Audio{Prev,Next}
+	~/.config/scripts/app-audio-control rewind {-,+}
+
+shift + XF86Audio{Lower,Raise}Volume
+	~/.config/scripts/app-audio-control {-,+}
+
+super + control + shift + {comma,period}
+    ~/.config/scripts/app-audio-control shift {unshift,shift}
+
+# adjust brightness
+{_, shift +}XF86MonBrightness{Down,Up}
+	echo "{2,10}" | xargs light -{U,A}
+
+# daily usage programs for me
+super + control + q
+    firefox
+
+super + control + w
+	~/.config/scripts/run-spotify
+
+super + control + {e, r, t, y}
+    flatpak run {org.telegram.desktop,com.viber.Viber,com.discordapp.Discord}
+
+super + control + y
+	flatpak run com.valvesoftware.Steam
+
+super + control + u
+    pavucontrol
+
+super + control + {a, s, d, f, g}
+    ~/.local/bin/tabbed-st {ranger, nvim, htop, cmatrix, nmtui}
+
+## emacs
+super + control + h; h
+    emacsclient -c
+
+super + control + h; a
+    emacsclient -c -a "agenda" -e "(org-agenda-delete-windows)"
+
+super + control + h; d
+    emacs --debug-init
+
+# file manager
+super + e; {e, r}
+	nemo {~, /}
+
+super + e; m
+	[ -d "/run/media/$USER" ] && nemo /run/media/$USER || \
+	    notify-send "nemo" "no devices mounted"
+
+# take screenshot
+Print
+	flameshot gui
+
+super + shift + s
+    flameshot gui
+
+shift + Print
+    ~/.config/scripts/dmenu/flameshot
+
+shift + control + Print
+    ~/.config/scripts/dmenu/flameshot-save
+
+# other
+super + control + shift + x
+	xkill

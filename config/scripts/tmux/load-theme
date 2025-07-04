@@ -1,0 +1,39 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+sourceOnedark() {
+    tmux set -g @plugin "odedlaz/tmux-onedark-theme"
+    tmux run-shell ~/.local/share/tmux/plugins/tmux-onedark-theme/tmux-onedark-theme.tmux
+}
+
+sourceGruvbox() {
+    tmux set -g @plugin 'egel/tmux-gruvbox'
+    tmux set -g @tmux-gruvbox 'dark'
+    tmux run-shell ~/.local/share/tmux/plugins/tmux-gruvbox/gruvbox-tpm.tmux 
+}
+
+sourceDracula() {
+    tmux set -g @plugin 'dracula/tmux'
+	tmux set -g @dracula-show-powerline true
+	tmux set -g @dracula-show-weather false
+	tmux run-shell ~/.local/share/tmux/plugins/tmux-dracula/dracula.tmux 
+}
+
+sourcePywal() {
+    tmux set -g @plugin "TechnicalDC/tmux-pywal-theme"
+    tmux run-shell ~/.local/share/tmux/plugins/tmux-pywal-theme/tmux-pywal-theme.tmux
+}
+
+sourceNord() {
+	tmux set -g @plugin "nordtheme/tmux"
+	tmux set -g @nord_tmux_show_status_content "0"
+}
+
+case "$colorscheme" in
+    "onedark-cyan"|"onedark-gray") sourceOnedark ;;
+    "gruvbox") sourceGruvbox ;;
+	"dracula") sourceDracula ;;
+	"nord")    sourceNord    ;; 
+    "pywal")   sourcePywal   ;;
+esac

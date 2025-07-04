@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Status bar for dwm.
+# Doesn't work if $profile is set not to dwm
+
+. ~/.files-balamah/settings.conf
+
+[ "$profile" != 'dwm' ] && exit
+
+shell() {
+	get=~/.config/scripts/get
+
+	while true; do
+		cpu=" $($get/cpu-load)"
+		ram=" $($get/ram-usage)"
+		uptime=" $($get/uptime)"
+		volume="$($get/volume)"
+		layout="󰌌 $($get/layout/layout)"
+		weather=$(cat /tmp/.files-balamah/10-curWeather.tmp)
+		date=" $($get/date)"
+		time=" $($get/time)"
+
+		if [ "$( $get/battery )" ]; then
+			battery=" $( $get/battery )%"
+
+			indicators="$cpu | $ram | $battery | $uptime | $volume | $layout | $weather | $time | $date"
+
+		else
+			indicators="$cpu | $ram | $uptime | $volume | $layout | $weather | $time | $date"
+		fi
+
+		echo "$indicators" | sed "s/|/$panelIndicatorsDelimeter/g" | \
+			xargs -I "%" xsetroot -name "%"
+
+	done &
+}
+
+[ "$panelIndicatorsVariation" = 'dwmblocks' ] && (dwmblocks &) || shell

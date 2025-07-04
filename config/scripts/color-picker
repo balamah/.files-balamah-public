@@ -1,0 +1,4 @@
+#!/bin/sh
+
+xcolor | xargs -I "%" ~/.config/scripts/notify-send-copy \
+		"${0##*/}" 'The color is %' '%'

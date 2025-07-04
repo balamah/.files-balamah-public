@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# $1		:: buffer-file-name
+# $2		:: PRESENTATION_EXPORT_NAME (optional)
+# ${@: -1}	:: --photos-only (optional)
+
+. ~/.files-balamah/config/scripts/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+[ -z "$1" ] && printParameters && exit 1
+
+bufferFileName="$1"
+filename="${bufferFileName##*/}"
+workingDirectoryRoot="$emacsOPEworkdir"
+outputDirectory="$emacsOPEoutputdir"
+
+[ ! -d "$workingDirectoryRoot" ] && mkdir "$workingDirectoryRoot"
+
+timestamp=$(date +'%s')
+workingCatalogName="$filename-$timestamp"
+workingDirectory="$workingDirectoryRoot/$workingCatalogName"
+
+mkdir -p "$workingDirectory"
+
+[ -z "$2" ] && outputFilename="${filename%%.*}.pdf" || outputFilename="$2.pdf"
+
+output="$outputDirectory/$outputFilename" 
+lastPresentationFile="$workingDirectoryRoot/last-presentation"
+
+echo "$output" > "$lastPresentationFile"
+# To get path of output, open clipmenu and copy last element.
+# I don't know why does it happen there
+[ "$emacsOPEcopyOutputPath" = 'yes' ] && [ "${@: -1}" != "--photos-only" ] && \
+	echo "$output" | xclip -selection clipboard
+
+[ "$emacsOPEcopyOutputPath" = 'yes' ] && [ "${@: -1}" = "--photos-only" ] && \
+	echo "$workingDirectory" | xclip -selection clipboard
+
+cat "$bufferFileName" | grep -E '^#\+TITLE|^\* ' | \
+	while read slide; do
+		scrot -u "$workingDirectory/$timestamp" 2> /dev/null && \
+			echo "Took screenshot of $slide"
+		xdotool key 'Control_L+Shift_L+period'
+	done
+
+compilePdf() {
+	convert "$workingDirectory/*" $output && \
+		notify-send "${0##*/}" "presentation succesfully converted to $outputFilename"
+}
+
+[ "${@: -1}" != "--photos-only" ] && compilePdf || \
+		notify-send "${0##*/}" 'Photos location has been copied to clipboard'

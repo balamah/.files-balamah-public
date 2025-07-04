@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# The script makes choosing minecraft versions painless.
+# It helps to save version config and switch easily
+
+. ~/.files-balamah/settings.conf 
+
+prompt="Choose minecraft version config to apply"
+
+[ "$1" = "sandbox" ] && \
+	minecraftDirectory=$minecraftSandboxDirectory && \
+	prompt="Choose minecraft version config to apply (for sandbox)"
+
+backups=$minecraftDirectory/backup
+
+version=$(find $minecraftConfigsPath/* -type d | sed "s@.*/@@" | dmenu -p "󰍳 $prompt")
+
+configPath="$minecraftConfigsPath/$version"
+
+[ -z "$version" ] || [ ! -d "$configPath" ] && exit
+
+[ ! -d "$backups" ] && mkdir "$backups"
+
+datetime=$(date +"%H%M-%d%m%Y")
+[ -f "$minecraftDirectory/options.txt" ] && \
+	mv "$minecraftDirectory/options.txt" "$backups/options-$datetime.txt"
+
+[ -f "$minecraftDirectory/optionsof.txt" ] && \
+	mv "$minecraftDirectory/optionsof.txt" "$backups/optionsof-$datetime.txt"
+
+cp $minecraftConfigsPath/$version/* "$minecraftDirectory" && \
+	notify-send "${0##*/}" "minecraft config was successfully set to $version"

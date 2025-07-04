@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: LaTeX-default-table
+# key: $$|
+# --
+
+\begin{center}
+\begin{tabular}{ ${1:|c|c|c|} } 
+\hline
+${2:columns & here & needed} \\\
+\hline
+$0 \\\
+\hline
+\end{tabular}
+\end{center}

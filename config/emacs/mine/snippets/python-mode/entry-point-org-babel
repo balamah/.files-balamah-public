@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: entry-point-org-babel
+# key: omain()
+# --
+
+from typing import Any
+
+
+def main() -> Any:
+    $0
+
+
+if __name__ == "__main__":
+    return main()

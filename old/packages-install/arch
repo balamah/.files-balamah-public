@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# install libraries
+echo "where you will choose xdg-desktop-portal, choose xdg-desktop-portal-gtk to avoid problems"
+cat ~/.files-balamah/install/packages-install/pkg-list/arch.pkg-list | sudo pacman -S -
+
+# install aur
+git clone https://aur.archlinux.org/yay.git ~/
+cd ~/yay && makepkg -si
+
+# install programs from aur
+yay -S cmatrix-git gummy-git spotify-adblock

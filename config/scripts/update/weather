@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Update weather on dwm status bar
+
+. ~/.files-balamah/settings.conf 
+
+[ "$profile" != 'dwm' ] && exit
+
+[ "$panelIndicatorsVariation" = 'dwmblocks' ] && \
+	pkill -RTMIN+5 dwmblocks || \
+	~/.config/scripts/get/weather > /tmp/.files-balamah/10-curWeather.tmp

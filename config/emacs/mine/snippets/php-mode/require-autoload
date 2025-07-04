@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: require autoload
+# key: require__
+# --
+
+require __DIR__ . '/../vendor/autoload.php';

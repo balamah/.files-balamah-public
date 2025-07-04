@@ -1,0 +1,1715 @@
+#+TITLE: README
+#+AUTHOR: Miha Balandin
+
+These dotfiles serve as a demonstration of my setup. The version I use
+on my personal machine includes additional functionality that I’ve
+chosen not to make public
+
+* Table of contents :toc:
+- [[#information][Information]]
+- [[#installation][Installation]]
+  - [[#preparation][Preparation]]
+  - [[#installation-on-linux][Installation on Linux]]
+  - [[#wsl][WSL]]
+- [[#how-do-my-dotfiles-work][How do my dotfiles work]]
+  - [[#linking][Linking]]
+  - [[#startup][Startup]]
+  - [[#user-experience][User experience]]
+- [[#keybindings][Keybindings]]
+  - [[#any-window-manager][Any window manager]]
+  - [[#dwm][Dwm]]
+  - [[#sxiv][Sxiv]]
+  - [[#mpv][Mpv]]
+  - [[#neovim][Neovim]]
+  - [[#ranger][Ranger]]
+  - [[#zathura][Zathura]]
+  - [[#emacs-keybindings][Emacs keybindings]]
+- [[#guides-for-my-dots-aspects][Guides for my dots aspects]]
+  - [[#default-scripts][Default scripts]]
+  - [[#startup-scripts][Startup scripts]]
+  - [[#dmenu-scripts][Dmenu scripts]]
+  - [[#get-scripts][Get scripts]]
+  - [[#cron-scripts][Cron scripts]]
+  - [[#python-scripts][Python scripts]]
+  - [[#emacs][Emacs]]
+  - [[#shell-functions][Shell functions]]
+  - [[#dots-utility][Dots utility]]
+  - [[#configuration][Configuration]]
+
+* Information
+These are my dotfiles for desktop usage, designed to be configurable
+via =settings.conf= and =python-scripts.ini=. Many programs are set up to
+read from these configuration files. Beyond aesthetics, they also
+offer [[Guides for my dots aspects][practical and functional guidance]].
+
+* Installation
+** Preparation
+1) Copy the example configuration files and configure copied files
+  #+begin_src bash
+  cp settings.conf.example settings.conf
+  cp python-scripts.ini.example python-scripts.ini
+  #+end_src
+
+   The most important configuration option is =$distro=, because
+   installation script installs packages according to your distro
+   using your package manager of your distro manager. Don't worry if
+   you set some config variables wrong and ran installation script,
+   for you can run the script again. Don't forget to configure api keys
+   in python-scripts.ini
+
+2) Create directories =~/.config=, =~/.local/bin=
+   Most of configurations are put in these directories
+
+  #+begin_src bash
+  mkdir -p ~/.config/ ~/.local/bin/
+  #+end_src
+
+** Installation on Linux
+Launch script =install.sh= in =install= directory
+#+begin_src shell
+cd install && ./install.sh
+#+end_src
+
+If you want to use emacs, don't forget to run command
+=M-x nerd-icons-install-fonts=
+
+Also, you can add your own custom installation script for
+installation. Configure those variables in order to implement it
+- =$enableCustomInstallationScript=
+- =$customInstallationScriptPath=
+
+** WSL
+In =wsl-install.sh= only debian is available. Just launch and enter
+sudo password.
+
+* How do my dotfiles work
+** Linking
+All files linked from catalog or file to destination
+| Catalog name | Destination  |
+|--------------+--------------|
+| config       | ~/.config    |
+| bin          | ~/.local/bin |
+| init/xinit   | ~/.xinitrc   |
+| home         | ~/           |
+
+Those directories or files will be linked if =$linkSystemFiles= set to =yes=
+| Directories              | Destination             |
+|--------------------------+-------------------------|
+| usr/applications/ready/* | /usr/share/applications |
+| etc/*                    | /etc                    |
+
+** Startup
+My dots launch a bit dumb, but simple. When you login, it launches
+=~/.zprofile= file, which sets some config variables, runs neofetch
+and then launches xorg using =startx=. When it ran =startx=, it launches
+script =~/.xinitrc= where it launches startup scripts
+1) [[00-programs-launch][00-programs-launch]]
+2) [[10-keyboard-config][10-keyboard-config]]
+3) [[20-temporary-files-create][20-temporary-files-create]]
+4) [[30-set-wallpaper][30-set-wallpaper]]
+4) [[40-panel-indicators][40-panel-indicators]]
+4) [[50-compositor-start][50-compositor-start]]
+
+** User experience
+My dotfiles are built with keyboard-driven workflows in mind. Various
+scripts and window manager configurations define hotkeys for efficient
+interaction, covering tasks like launching applications, managing
+windows, adjusting audio, setting wallpapers, and more.
+
+Most of these hotkeys are defined in configuration files that get
+loaded on startup, such as:
+
+- ~/.config/sxhkd/sxhkdrc        :: for general keybindings
+- ~/.config/sxhkd/sxhkdrc-de     :: for general keybindings in desktop environment
+- ~/.config/compile/dwm/config.h :: keybindings for dwm
+
+You can choose sxhkdrc in =settings.conf= by configuring
+- =$enableCustomSxhkdrc=
+- =$customSxhkdrc=
+
+* Keybindings
+Here are definitions for command shortcuts to remember, the
+definitions have style of =c= macroses. Without shortcuts, tables will
+be too big and complicated to read
+
+| Shortcut | Alias                                                                    |
+|----------+--------------------------------------------------------------------------|
+| SCRIPT   | ~/.config/scripts/                                                       |
+| DMSCRIPT | ~/.config/scripts/dmenu/                                                 |
+| WIDGET   | ~/.config/scripts/widgets/launch-widget ~/.config/scripts/widgets/start/ |
+| TERMINAL | st -e                                                                    |
+
+** Any window manager
+It's done by using [[file:config/sxhkd/sxhkdrc][sxhkd]]. It creates unified keybindings to easily
+configure bunch of window managers. If you don't like those
+keybindings, use your custom keybindings by configuring variables
+- =$enableCustomSxhkdrc=
+- =$customSxhkdrc=
+  
+*** Volume and multimedia control
+| Keybinding         | Action                           | Command                               |
+|--------------------+----------------------------------+---------------------------------------|
+| AudioPrev          | Previous track                   | SCRIPT [[app-audio-control][app-audio-control]] previous     |
+| AudioPlay          | Play/pause track                 | SCRIPT [[app-audio-control][app-audio-control]] play-pause   |
+| AudioNext          | Next track                       | SCRIPT [[app-audio-control][app-audio-control]] next         |
+| S-AudioPrev        | Rewind track                     | SCRIPT [[app-audio-control][app-audio-control]] rewind -     |
+| S-AudioNext        | Rewind back                      | SCRIPT [[app-audio-control][app-audio-control]] rewind +     |
+| C-S-AudioPrev      | Rewind track radically           | SCRIPT [[app-audio-control][app-audio-control]] rewind - rad |
+| C-S-AudioNext      | Rewind back radically            | SCRIPT [[app-audio-control][app-audio-control]] rewind + rad |
+| S-AudioRaiseVolume | Raise track volume               | SCRIPT [[app-audio-control][app-audio-control]] +            |
+| S-AudioLowerVolume | Lower track volume               | SCRIPT [[app-audio-control][app-audio-control]] -            |
+| S-AudioPlay        | Toggle loop                      | SCRIPT [[app-audio-control][app-audio-control]] loop         |
+| C-AudioPlay        | Toggle shuffle                   | SCRIPT [[app-audio-control][app-audio-control]] shuffle      |
+| S-XF86AudioMute    | Toggle mute                      | SCRIPT [[app-audio-control][app-audio-control]] mute         |
+| s-C-<              | Change program that is playing < | playerctld unshift                    |
+| s-C->              | Change program that is playing > | playerctld shift                      |
+
+*** Programs for my daily usage
+**** Gui
+| Keybinding | Program     | Command                             |
+|------------+-------------+-------------------------------------|
+| s-C-q      | firefox     | firefox                             |
+| s-C-w      | spotify     | SCRIPT run-spotify                  |
+| s-C-e      | telegram    | flatpak run org.telegram.desktop    |
+| s-C-r      | viber       | flatpak run com.viber.Viber         |
+| s-C-t      | discord     | flatpak run com.discordapp.Discord  |
+| s-C-y      | steam       | flatpak run com.valvesoftware.Steam |
+| s-C-u      | pavucontrol | pavucontrol                         |
+
+**** Cli
+| Keybinding | Program       | Command                |
+|------------+---------------+------------------------|
+| s-C-a      | ranger        | TERMINAL ranger        |
+| s-C-s      | nvim          | TERMINAL nvim          |
+| s-C-d      | htop          | TERMINAL htop          |
+| s-C-f      | cmatrix       | TERMINAL cmatrix       |
+| s-C-g      | nmtui         | TERMINAL nmtui         |
+| s-C-j      | speedtest-cli | TERMINAL speedtest-cli |
+
+**** Emacs
+| Keybinding | Program                       | Command                                                                   |
+|------------+-------------------------------+---------------------------------------------------------------------------|
+| s-C-h h    | emacs client                  | emacsclient -c                                                            |
+| s-C-h a    | emacs client open org agenda  | emacsclient -c -a 'agenda' -e '(org-agenda-delete-windows)'               |
+| s-C-h m    | emacs client open org metrics | emacsclient -c -a 'metrics -e '(org-capture)'                             |
+| s-C-h d    | emacs default                 | emacs --debug-init                                                        |
+| s-C-h s    | emacs default open scratch    | emacsclient -c -s "default" -a "scratch-buffer" --eval "(scratch-buffer)" |
+
+*** Dmenu scripts
+Prefix of dmenu scripts is =s-C-B= which is aliased in this list to =D=
+
+| Keybinding | Action                                       | Script name                               |
+|------------+----------------------------------------------+-------------------------------------------|
+| s-r        | launch desktop entry                         | DMSCRIPT [[~/.config/scripts/dmenu/desktop-entry-launch][desktop-entry-launch]]             |
+| s-S-r      | default dmenu_run                            | DMSCRIPT [[command-launch][command-launch]]                   |
+| D-b        | bookmarks script                             | DMSCRIPT [[bookmarks][bookmarks]]                        |
+| D-d        | launch daemon                                | DMSCRIPT [[daemon-launcher][daemon-launcher]]                  |
+| D-g        | connect to wifi                              | DMSCRIPT wifi-connect                     |
+| D-h        | generate password                            | DMSCRIPT password-generator               |
+| D-i        | wireguard-vpn-connect                        | DMSCRIPT [[~/.config/scripts/dmenu/wireguard-vpn-connect][wireguard-vpn-connect]]            |
+| D-j        | convert to lisp case                         | DMSCRIPT [[lisp-case-text-format][lisp-case-text-format]]            |
+| D-m        | open man page                                | DMSCRIPT manual                           |
+| D-M        | control monitors                             | DMSCRIPT [[monitors-control][monitors-control]]                 |
+| D-n        | minecraft version config manager             | DMSCRIPT [[minecraft-config-manager][minecraft-config-manager]]         |
+| D-N        | minecraft version config manager for sandbox | DMSCRIPT [[minecraft-config-manager][minecraft-config-manager]] sandbox |
+| D-s        | convert currency                             | DMSCRIPT currency-convert                 |
+| D-u        | favorite apps. Made for my mother            | DMSCRIPT [[~/.config/scripts/dmenu/favorite-apps][favorite-apps]]                    |
+| D-y        | pick emoji                                   | DMSCRIPT [[emoji-picker][emoji-picker]]                     |
+| D-z        | helps to become stronger while playing       | DMSCRIPT [[exercise-times-counter][exercise-times-counter]]           |
+| D-l        | convert layout from ukrainian to english     | DMSCRIPT [[layout-converter][layout-converter]]                 |
+| s-C-o      | shutdown                                     | DMSCRIPT [[shutdown][shutdown]] shutdown                |
+| s-C-p      | reboot                                       | DMSCRIPT [[shutdown][shutdown]] reboot                  |
+| s-C-;      | powermenu                                    | DMSCRIPT [[powermenu][powermenu]]                        |
+| S-C-prtscr | choose screenshot save location              | DMSCRIPT [[flameshot][flameshot-save]]                   |
+| S-prtscr   | flameshot actions                            | DMSCRIPT [[flameshot][flameshot]]                        |
+| s-D        | kill process without htop                    | DMSCRIPT kill-process                     |
+
+*** Widgets
+Widget keybinding prefix is =W= which is =s-W=.
+
+| Keybinding | Action         | Command          |
+|------------+----------------+------------------|
+| W-d        | Open dashboard | WIDGET dashboard |
+
+*** Other
+| Keybinding | Action                              | Command   |
+|------------+-------------------------------------+-----------|
+| s-C-S-v v  | open clipmenu                       | clipmenu  |
+| s-C-S-v d  | clear clipboard                     | clipdel   |
+| s-C-S-v c  | copy saved texts                    | [[copy-text][copy-text]] |
+| s-e e      | open file manager                   | nemo ~    |
+| s-e r      | open file manager in root           | nemo ~    |
+| s-e m      | open file manager in mounted drives | nemo ~    |
+| D-w        | open recent wallpapers              |           |
+
+** Dwm
+*** Dmenu scripts
+All scripts are stored in =~/.config/scripts/dmenu= or
+=~/.files-balamah/config/scripts/dmenu=. There are some scripts that
+require parameters, so i wrote them here
+
+| Keybinding | Action        | Script name          |
+|------------+---------------+----------------------|
+| s-S-q      | logout to tty | DMSCRIPT dwm/logout  |
+| s-C-S-k    | restart dwm   | DMSCRIPT dwm/restart |
+
+*** Default scripts
+| Keybinding | Action                           | Command                                              |
+|------------+----------------------------------+------------------------------------------------------|
+| s-C-S-q    | ping gnu.org, test connection    | TERMINAL ~/.config/scripts/connection-test           |
+| s-C-S-w    | launch webcam                    | TERMINAL ~/.config/scripts/webcam-launch             |
+| s-S-w      | sync telegram with pywal         | SCRIPT additional/wal-telegram/wal-telegram --wal -r |
+| s-C-S-e    | set random wallpaper             | SCRIPT [[10-random-wallpaper-set][startup/10-random-wallpaper-set]]               |
+| s-F5       | sync with pywal everything       | SCRIPT [[wal-sync][wal-sync]]                                      |
+| s-p        | color picker by clicking         | SCRIPT color-picker                                  |
+| s-space    | change layout                    | SCRIPT notify-keymap-change                          |
+| s-C-S-r    | kill programs with notifications | SCRIPT kill-progs                                    |
+| s-S-p      | update weather on statusbar      | SCRIPT update-weather                                |
+| s-C-S-l    | lock                             | slock                                                |
+| s-C-S-t    | kill spotify                     | killall -9 spotify                                   |
+| s-C-S-x    | xkill                            | xkill                                                |
+
+*** Tags
+| Keybinding | Action                 |
+|------------+------------------------|
+| s-{1..9}   | Go to tag 1..9         |
+| s-[        | Switch to next tag     |
+| s-]        | Switch to previous tag |
+
+** Sxiv
+Variable =$file= is selected image in sxiv
+
+| Keybinding | Action                                 | Function/command                                     |
+|------------+----------------------------------------+------------------------------------------------------|
+| C-x C-w    | Set wallpaper                          | setWallpaper "$file"                                 |
+| C-x C-v    | Copy file path                         | clipboardCopy "$file"                                |
+| C-x C-b    | Copy file name                         | clipboardCopy "${file##*/}"                          |
+| C-x C-c    | Copy image                             | xclip -selection clipboard -target image/png "$file" |
+| C-x C-x    | Open current directory in file manager | fileManagerOpen "$file"                              |
+| C-x C-d    | Remove the image                       | rm "$file"                                           |
+| C-x C-r    | Rename the image                       | rename "$file"                                       |
+| C-x C-a    | Move the image                         | transfer mv "$file"                                  |
+| C-x C-q    | Copy the image                         | transfer cp "$file"                                  |
+
+** Mpv
+| Keybinding | Action       |
+|------------+--------------|
+| r          | rotate video |
+
+** Neovim
+Leader key is =;=
+
+| Keybinding  | Action                       |
+|-------------+------------------------------|
+| C-e         | Go to end of line            |
+| C-n         | Toggle relative number       |
+| Q           | :wq                          |
+| C-q         | :q!                          |
+| C-f         | Toggle NERDTree              |
+| <leader>ep  | Run python script            |
+| <leader>es  | Run shell script             |
+| <leader>w   | Split vertically             |
+| <leader>W   | Split horizontally           |
+| <leader>of  | Open file using telescope    |
+| <leader>osf | Open file by searching words |
+| <leader>nf  | Touch file                   |
+| <leader>nd  | Create directory             |
+
+** Ranger
+| Keybinding | Action                 |
+|------------+------------------------|
+| zf         | Select files by typing |
+| zF         | Cancel selection       |
+| gG         | cd /mnt/gutter         |
+| gb         | cd /etc/grub.d         |
+
+** Zathura
+| Keybinding | Action                                       |
+|------------+----------------------------------------------|
+| C-o        | Cancel highlight                             |
+| C-i        | Invert                                       |
+| C-k        | Copy current file name and path to clipboard |
+
+** Emacs keybindings
+Leader key is =;=
+
+*** Evil-mode
+| Mode   | Keybinding  | Command                       |
+|--------+-------------+-------------------------------|
+| normal | <leader>:   | other-window-backward         |
+| normal | <leader>;   | evil-window-next              |
+| normal | <leader>Bo  | open-bookmark                 |
+| normal | <leader>Pf  | projectile-find-file          |
+| normal | <leader>Bb  | counsel-evil-marks            |
+| normal | <leader>Ba  | bookmark-set                  |
+| normal | <leader>Bj  | counsel-bookmark              |
+| normal | <leader>Bl  | bookmark-bmenu-list           |
+| normal | <leader>Bd  | bookmark-delete               |
+| normal | <leader>Br  | bookmark-rename               |
+| normal | <leader>Bs  | bookmark-save                 |
+| normal | <leader>SPC | counsel-dired                 |
+| normal | <leader>bb  | switch-to-buffer              |
+| normal | <leader>bo  | switch-to-buffer-other-window |
+| normal | <leader>ff  | flop-frame                    |
+| normal | <leader>ft  | transpose-frame               |
+| normal | <leader>k   | kill-buffer                   |
+| normal | <leader>of  | counsel-find-file             |
+| normal | <leader>or  | counsel-recentf               |
+| normal | <leader>pa  | pyvenv-activate               |
+| normal | <leader>pa  | pyvenv-activate               |
+| normal | <leader>pd  | pyvenv-deactivate             |
+| normal | <leader>pd  | pyvenv-deactivate             |
+| normal | <leader>s   | swiper                        |
+| normal | <leader>W   | split-below-switch-window     |
+| normal | <leader>w   | split-right-switch-window     |
+| normal | <leader>xC  | kill-buffer-close-window      |
+| normal | <leader>xc  | delete-window                 |
+| normal | <leader>xw  | delete-other-windows          |
+| normal | \C-e        | end-of-line                   |
+| normal | gcc         | comment-line                  |
+| normal | gr          | revert-buffer                 |
+| visual | \C-e        | end-of-line                   |
+
+*** Not evil-mode
+| Keybinding   | Command                              |
+|--------------+--------------------------------------|
+| C-c g        | change-transparency                  |
+| C-&          | enlarge-window-horizontally          |
+| C-*          | shrink-window-horizontally           |
+| C-c x        | org-capture                          |
+| C-M-&        | shrink-window                        |
+| C-M-*        | enlarge-window                       |
+| C->          | indent-rigidly-right-to-tab-stop     |
+| C-<          | indent-rigidly-left-to-tab-stop      |
+| C-x c        | kill-buffer-close-window             |
+| C-c P i      | package-install                      |
+| C-c P d      | package-delete                       |
+| C-c P l      | package-list-packages                |
+| C-x C-4 C-f  | find-file-other-window               |
+| C-x C-1      | delete-other-windows                 |
+| C-x C-o      | other-window                         |
+| C-x C-S-o    | other-window-backward                |
+| C-c s        | scratch-buffer                       |
+| C-S-F        | find-grep-dired                      |
+| C-x C-2      | split-below-switch-window            |
+| C-x C-3      | split-right-switch-window            |
+| C-x C-#      | split-right-mx                       |
+| C-x #        | split-right-mx                       |
+| C-x C-@      | split-below-mx                       |
+| C-x @        | split-below-mx                       |
+| C-x C-b      | list-buffers-other-window            |
+| C-c {        | copy-buffer-name                     |
+| S-<f9>       | run script. You can see code [[file:home/.emacs.d/editor-config.org::*Run scripts][here]]    |
+| S-<f10>      | run-php-file                         |
+| S-M-<f10>    | run-php-file-container               |
+| S-<f11>      | run-php-web                          |
+| S-<f12>      | run-localhost                        |
+| C-c S a      | git-sync-all-list                    |
+| C-c S c      | git-sync-current-directory           |
+| C-c S P      | git-sync-current-directory           |
+| C-c S P c    | git-pull                             |
+| C-c S P a    | git-pull-all-list                    |
+| M-o a        | org-agenda                           |
+| C-c n        | nerd-icons-insert                    |
+| C-M-{        | scroll-down-like-mwheel              |
+| C-M-}        | scroll-up-like-mwheel                |
+| C-x R        | emacs-reload-config                  |
+| C-<tab>      | org-cycle                            |
+| C-c c        | insert-header-counter                |
+| C-c C        | insert-counter                       |
+| C-c t        | org-todo                             |
+| C-M-i        | org-toggle-inline-images             |
+| C-S-C        | org-toggle-checkbox                  |
+| M-p          | org-move-subtree-up                  |
+| M-n          | org-move-subtree-down                |
+| M-o s s      | org-schedule                         |
+| M-o s d      | org-deadline                         |
+| M-o d        | org-download-image                   |
+| M-o g s      | org-discipline-get-skipped-days      |
+| C-M-SPC      | org-next-item                        |
+| C-M-S-SPC    | org-previous-item                    |
+| C-c RET      | org-insert-subheading                |
+| M-o t        | org-babel-tangle                     |
+| C-c i d      | create-header-insert-time            |
+| C-c i t      | create-header-insert-time            |
+| C-c i T      | insert-time                          |
+| C-c i D      | insert-date                          |
+| C-}          | org-ctrl-c-minus                     |
+| M-o r t      | org-roam-buffer-toggle               |
+| M-o r i      | org-roam-node-insert                 |
+| M-o r f      | org-roam-node-find                   |
+| C-c y        | cfw:open-org-calendar                |
+| M-o p p      | org-presentation-mode                |
+| M-o p e      | org-presentation-export              |
+| C-S-T        | org-present                          |
+| C->          | org-present-next                     |
+| C-<          | org-present-prev                     |
+| M-o i e      | enable-visual-fill-column            |
+| M-o i d      | disable-visual-fill-column           |
+| C-c w        | ewal-mode                            |
+| C-c U        | disable-ewal                         |
+| C-c W        | ewal-mode -presentation              |
+| C-c b        | dashboard-open                       |
+| C-c C-p C-a  | add-project                          |
+| C-c C-p C-r  | projectile-remove-known-project      |
+| M-0          | treemacs                             |
+| C-<tab>      | treemacs-TAB-action                  |
+| C-$          | flop-frame                           |
+| C-%          | transpose-frame                      |
+| C-`          | open-vterm-split-below               |
+| C-~          | open-vterm-split-right               |
+| C-c p a      | pyvenv-activate                      |
+| C-c p d      | pyvenv-deactivate                    |
+| M-H          | drag-stuff-left                      |
+| M-L          | drag-stuff-right                     |
+| M-J          | drag-stuff-down                      |
+| M-K          | drag-stuff-up                        |
+| M-]          | ac-php-find-symbol-at-point          |
+| M-[          | ac-php-location-stack-back           |
+| C-<return>   | lsp-find-definition                  |
+| C-S-<return> | flymake-show-buffer-diagnostics      |
+| C-M-<return> | dap-breakpoint-toggle                |
+| C-#          | transpose-frame                      |
+| C-$          | flop-frame                           |
+| C-&          | enlarge-window-horizontally          |
+| C-*          | shrink-window-horizontally           |
+| C-<          | indent-rigidly-left-to-tab-stop      |
+| C-<          | org-present-prev                     |
+| C-<return>   | lsp-find-definition                  |
+| C-<tab>      | org-cycle                            |
+| C-<tab>      | treemacs-TAB-action                  |
+| C->          | indent-rigidly-right-to-tab-stop     |
+| C->          | org-present-next                     |
+| C-M-&        | shrink-window                        |
+| C-M-*        | enlarge-window                       |
+| C-M-<return> | dap-breakpoint-toggle                |
+| C-M-S-SPC    | org-previous-item                    |
+| C-M-SPC      | org-next-item                        |
+| C-M-i        | org-toggle-inline-images             |
+| C-S-<return> | flymake-show-buffer-diagnostics      |
+| C-S-C        | org-toggle-checkbox                  |
+| C-S-F        | find-grep-dired                      |
+| C-S-T        | org-present                          |
+| C-`          | open-vterm-split-below               |
+| C-c C        | insert-counter                       |
+| C-c C-p C-a  | add-project                          |
+| C-c C-p C-r  | projectile-remove-known-project      |
+| C-c I        | insert-time                          |
+| C-c P d      | package-delete                       |
+| C-c P i      | package-install                      |
+| C-c P l      | package-list-packages                |
+| C-c RET      | org-insert-subheading                |
+| C-c S a      | git-sync-all-list                    |
+| C-c S c      | git-sync-current-directory           |
+| C-c U        | disable-ewal                         |
+| C-c W        | ewal-mode -presentation              |
+| C-c b        | dashboard-open                       |
+| C-c c        | insert-header-counter                |
+| C-c g        | change-transparency                  |
+| C-c i        | create-header-insert-time            |
+| C-c l        | org-copy-insert-link                 |
+| C-c p a      | pyvenv-activate                      |
+| C-c p d      | pyvenv-deactivate                    |
+| C-c s        | scratch-buffer                       |
+| C-c t        | org-todo                             |
+| C-c w        | ewal-mode                            |
+| C-c y        | cfw:open-org-calendar                |
+| C-c {        | copy-buffer-name                     |
+| C-x #        | split-right-mx                       |
+| C-x @        | split-below-mx                       |
+| C-x C-#      | split-right-mx                       |
+| C-x C-1      | delete-other-windows                 |
+| C-x C-2      | split-below-switch-window            |
+| C-x C-3      | split-right-switch-window            |
+| C-x C-4 C-f  | find-file-other-window               |
+| C-x C-@      | split-below-mx                       |
+| C-x C-S-o    | other-window-backward                |
+| C-x C-b      | list-buffers-other-window            |
+| C-x C-o      | other-window                         |
+| C-x c        | kill-buffer-close-window             |
+| C-}          | org-ctrl-c-minus                     |
+| C-{          | string-inflection-all-cycle          |
+| C-c C--      | org-edit-latex-flagment              |
+| C-c u k      | org-priority-up                      |
+| C-c u j      | org-priority-down                    |
+| C-M-h        | org-table-move-column-left           |
+| C-M-l        | org-table-move-column-right          |
+| C-~          | open-vterm-split-right               |
+| M-0          | treemacs                             |
+| M-H          | drag-stuff-left                      |
+| M-J          | drag-stuff-down                      |
+| M-K          | drag-stuff-up                        |
+| M-L          | drag-stuff-right                     |
+| M-[          | ac-php-location-stack-back           |
+| M-]          | ac-php-find-symbol-at-point          |
+| M-n          | org-move-subtree-down                |
+| C-c u u      | org-auto-link-ask-file               |
+| M-o a        | org-agenda                           |
+| M-o i d      | disable-visual-fill-column           |
+| M-o i e      | enable-visual-fill-column            |
+| M-o p        | org-presentation-mode                |
+| M-o r f      | org-roam-node-find                   |
+| M-o r i      | org-roam-node-insert                 |
+| M-o r t      | org-roam-buffer-toggle               |
+| M-o s d      | org-deadline                         |
+| M-o s s      | org-schedule                         |
+| M-o t        | org-babel-tangle                     |
+| M-o P s      | org-timer-set-timer                  |
+| M-o P S      | org-timer-stop                       |
+| M-o P b      | org-timer-start                      |
+| M-o P SPC    | org-timer-pause-or-continue          |
+| M-p          | org-move-subtree-up                  |
+| S-<f10>      | run-php-file                         |
+| S-<f11>      | run-php-web                          |
+| S-<f12>      | run-localhost                        |
+| S-<f8>       | run-shell-script                     |
+| S-<f9>       | run-python-file                      |
+| S-M-<f10>    | run-php-file-container               |
+| C-c p f c    | project-config-file-create           |
+| C-c p f d    | project-config-directory-find-delete |
+| C-c p f l    | project-config-file-load             |
+| C-c p f o    | project-config-file-open             |
+| C-x T n      | tab-new                              |
+| C-x T c      | tab-close                            |
+| C-x T C      | tab-close-other                      |
+| C-x T b      | switch-to-buffer-other-tab           |
+| C-x T f      | find-file-other-tab                  |
+| C-x T d      | dired-other-tab                      |
+| C-x T s      | tab-switch                           |
+| C-x T r      | tab-rename                           |
+| C-x T o      | other-tab-prefix                     |
+| C-c 1 d      | docker                               |
+| C-c C-x S    | org-latex-preview-scale-change       |
+| C-c M        | monkeytype-region                    |
+| C-c a        | align-regexp                         |
+| C-c m m      | make-directory                       |
+| C-c m d      | make-directory-dired                 |
+| C-c k t      | counsel-load-theme                   |
+| C-c l i      | counsel-imenu                        |
+
+*** Evil-mode macroses
+| Keybinding | Command                     |
+|------------+-----------------------------|
+| @c         | check-fold-go-down          |
+| @f         | org-format-long-string      |
+| @l         | org-auto-link               |
+| @m         | org-move-scheduled-deadline |
+| @n         | write-numbers-list          |
+| @x         | check-go-down               |
+
+* Guides for my dots aspects
+Here you can see some my dotfiles aspects. The main ascepts are my scripts.
+Usually, you can see guides on how to launch scripts in the scripts on
+top comments. But it's better to write something down. All scripts are
+saved in =~/.config/scripts= which is linked to =~/.files-balamah/config/scripts=.
+Script hotkeys are described in [[#dwm][dwm keybindings]]
+
+** Default scripts
+*** app-audio-control
+**** Description
+It's multimedia control script. It can
+1) Toggle between play and pause
+2) Play next and previous track
+3) Rewind track
+4) Control track volume
+
+The script requires action as argument if action is empty then script
+will do nothing. If you want to increase decrease player volume, use =+=
+or =-= . Or if you want to rewind, use rewind and =+= or =-=
+
+**** Examples:
+Increase volume
+#+begin_src bash
+~/.config/scripts/app-audio-control +
+#+end_src
+
+Rewind next
+#+begin_src bash
+~/.config/scripts/app-audio-control rewind +
+#+end_src
+
+Big rewind
+#+begin_src bash
+~/.config/scripts/app-audio-control rewind + radical
+#+end_src
+
+Play pause
+#+begin_src bash
+~/.config/scripts/app-audio-control play-pause
+#+end_src
+
+Previous
+#+begin_src bash
+~/.config/scripts/app-audio-control previous
+#+end_src
+
+Change player to next player
+#+begin_src bash
+~/.config/scripts/app-audio-control shift shift
+#+end_src
+
+Change player to previous player
+#+begin_src bash
+~/.config/scripts/app-audio-control shift unshift
+#+end_src
+
+*** launch
+It's helper script for [[favorite-apps][favorite-apps]] and [[desktop-entry-launch][desktop-entry-launch]]
+
+The script takes parameter program name. Spaces should be replaced to
+#. The chain of opening program is looking like:
+1) flatpak 
+2) gtk 
+3) st 
+4) eval
+
+It goes forward if it fails
+
+*** volume-control
+The script controls volume. Bound to upper volume and lower volume
+keys
+
+The script takes parameter $1 and it should be equal to element from
+this list
+- up
+- down
+- mute
+- unmute
+
+*** wal-sync
+It's the main script for the rice. It makes most of programs sync with
+=$colorscheme=
+
+** Startup scripts
+The scripts execute on start in =~/.xinitrc=.
+
+*TIP:* To create disposable startup script, you need
+1) To name him that his name is equal to pattern =*.ignore*= or =*.tmp*=
+2) Add on last line of script
+   #+begin_src shell
+   rm "$0"
+   #+end_src
+
+*** 00-programs-launch
+The script launches important programs such as
+- [[https://github.com/baskerville/sxhkd][sxhkd]] to use [[Any window manager][global keybindings]]
+- polkit
+- [[https://github.com/rvaiya/warpd][warpd]]
+- [[https://github.com/Gitoffthelawn/gummyhttps://github.com/Gitoffthelawn/gummy][gummy]]
+- [[https://flameshot.org/https://flameshot.org/][flameshot]]
+- [[https://github.com/dunst-project/dunst][dunst]]
+- emacs daemon
+- clipmenu
+
+*** 10-keyboard-config
+It configures keyboard and execute
+- Layout switch using =$layouts=
+- Picks keyboard config according to =$layoutMethodChange=
+- Enables numlock if =$enableNumlockStart= is =yes=
+- Opens openrgb and applies white color on keyboard I'm annoyed that
+  keyboard is colorful
+
+*** 20-temporary-files-create
+Creates \/tmp/.files-balamah with files
+| File/directory name  | Information                              |
+|----------------------+------------------------------------------|
+| 10-curWeather.tmp    | current weather (status and temperature) |
+| 20-curWallpaper.tmp  | current wallpaper filename and path      |
+| aliases.zsh          | temporary files                          |
+| previous-colorscheme | file for [[wal-sync][wal-sync]]                        |
+| temporary-config.el  | temporary emacs config                   |
+| recent/              | recent outputs from some dmenu scripts   |
+| playerctl/           | resources for [[app-audio-control][app-audio-control]]          |
+
+*** 30-set-wallpaper
+Applies random wallpaper from =~/Images/wallpapers=, echoing to
+=/tmp/20-curWallpaper.tmp= and launches =wal-sync= script
+
+1) If =$enableRandomWallpapers= set to =yes= apply wallpaper from
+   =$wallpapersPath=, otherwise, it will set previous wallpaper
+2) Echo current wallpaper to =/tmp/20-curWallpaper.tmp=
+3) Launch [[wal-sync][wal-sync]] script
+
+*** 40-panel-indicators
+It gets launches all =get scripts= from =config/scripts/get=, signs into
+string, and use this string for =xsetroot= if =$panelIndicatorsVariation=
+set to shell. Otherwise, it will launch dwmblocks
+
+*** 50-compositor-start
+Depending on =$picom= launches compositor
+
+If =$colorscheme= is not pywal, then it will set picom config, that
+doesn't have transparency for zathura
+
+** Dmenu scripts
+*** bookmarks
+**** Description
+The script launches dmenu with [[Bookmark file syntax][bookmark files]], that are called in
+script =categories=. After selecting category, the script gets command
+and you need to select file/directory/... to open. Basically, the
+script forms evaluation command
+#+begin_src bash
+eval "$command ${bookmark##*  }"
+#+end_src
+
+It forms command like "!COMMAND + chosen file". For example if you
+have chosen category that has =sxiv= as main command, and some random
+image directory, it will form this command
+#+begin_src bash
+sxiv ~/Images/some-random-image-directory
+#+end_src
+
+Every expression starts with *!*
+
+**** Bookmark file syntax
+#+begin_src bookmark
+!COMMAND: just default command # (like emacsclient -c -a 'org-agenda')
+
+# key -> value (path to file)
+ptf           ~/path/to/file
+#+end_src
+
+The bookmark file should contain command, which should be taken
+from /bin. Then you need to create bookmarks that look like
+=key= -> =value=
+
+I recommend to make =key= as first letters for the path
+
+**** Include the bookmarks
+You can also *include* the bookmarks by writing file path using =!INCLUDE=
+expression
+
+#+begin_src bookmark
+!COMMAND: nemo
+!INCLUDE: ~/.config/scripts/dmenu/resources/bookmarks/directories
+
+C         ~/Coding
+Cp        ~/Coding/projects
+Cl        ~/Coding/leetcode-problems
+Ct        ~/Coding/test
+#+end_src
+
+**** ALL expression
+You can list all files, directories or links using =ALL= expression.
+Basically, this expression is find utility inside bookmark files
+
+Here are descibed columns
+1) Directory
+2) Type
+   | First letter | Type                           |
+   |--------------+--------------------------------|
+   | b            | block (buffered) special       |
+   | c            | character (unbuffered) special |
+   | d            | directory                      |
+   | p            | named pipe (FIFO)              |
+   | f            | regular file                   |
+   | l            | symbolic link                  |
+   | s            | socket                         |
+   | D            | door (Solaris)                 |
+3) Pattern
+   If you want want to match every files or directory, use =*=
+4) Prefix
+   It will change starter prefix. Here is example in [[file:config/scripts/dmenu/resources/bookmarks/books][books bookmark file]]
+   dscb9/ -> %
+   opb/ -> O
+
+   To delete prefix, it should be equal to =^$= in ALL expression
+   #+begin_src bookmark
+   !ALL: | ~/Org/presentations | f | *.org | ^$
+   #+end_src
+
+#+begin_src bookmark
+!COMMAND: zathura
+
+!ALL: | ~/Documents/school/books/9 | f | *.pdf | %
+#+end_src
+
+**** Tricks
+As you can see in description, it forms command to be
+evaluated. Therefore, you can do some tricks, like creating bookmarks,
+that will open files that have current date in their name
+#+begin_src conf
+oihd            ~/Org/images/hw/*$(date +"%d%m%Y")*
+oihD            ~/Org/images/hw/*$(date -d "yesterday" +"%d%m%Y")*
+#+end_src
+
+And this allows so much things to be created. Be careful, it
+evaluatues the code, and watch carefully for malisious code
+
+*** calculator
+It's just default calculator that uses =bc= utility. Some symbols can be
+changed. Here's table that shows substitution
+
+| Combo  | Output |
+|--------+--------|
+| **     | ^      |
+| --     | +      |
+| =      | +      |
+| S      | sqrt   |
+| Z      | 000    |
+| \times | *      |
+| _      | -      |
+
+*** command-launch
+Just default dmenu_run but with prompt "Launch command"
+
+*** monitors-control
+Before using the script, configure those variables
+- =$primaryMonitorPort=
+- =$defaultExtendDirection=
+
+The script allows to control connected monitors. You can do these
+things with monitors
+
+**** duplicate
+Duplicate all ports to =$primaryMonitorPort=
+
+**** extend
+Extend all ports from =$primaryMonitorPort= to the =$defaultExtendDirection=
+direction
+
+**** move
+Move selected port to direction according to other selected port
+
+*** copy-text
+The script just saves something to clipboard. You may say, that it's
+very dumb, and it's better to use clipboard or just open terminal
+and copy something. It's very useful when you want to move some images
+using sxiv
+
+*** daemon-launcher
+It launches some daemons. The most useful of daemons are =internet wait=
+and =emacs=. It's not very convenient to open terminal and write some
+repetitive commands, it's better to use menu
+
+*** desktop-entry-launch
+dmenu_run with desktop entries. You can configure entries that it sees
+using =$desktopEntriesDirectories=. After you choose desktop entry, it
+will launch it using [[launch][launch]] script
+
+*** emoji-picker
+Very cool emoji picker. You just search emojis or symbols by words.
+There are also emoji groups. Here are they
+| Emoji group | Content           |
+|-------------+-------------------|
+| ;           | Emoji combos      |
+| %           | Favorite emojis   |
+| [           | small numbers     |
+| ]           | subscript numbers |
+| '           | physics symbols   |
+| "           | powerline symbols |
+
+*** exercise-times-counter
+The script can convert your body to gigachad body. The best usage is
+when you lose in games. You can add by: {10..50}. Or you can reset
+reps. It uses file =/tmp/.files-balamah/exercise-quantity= to save reps
+count.
+
+There is also [[10-notify-doing-exercises][notifier]] to make the script useful
+
+*** flameshot
+It's just flameshot dmenu edition
+
+*** flameshot-save
+It opens [[file:~/.config/scripts/dmenu/resources/bookmarks/image directories][image bookmarks]] and saves image to the chosen path
+
+*** functions.sh
+It's script with functions that helps to avoid repetition.
+There are some important functions for [[bookmarks][bookmarks]] dmenu script.
+
+WARNING: create scripts using =bash= shebang in order to make script
+work
+
+*** layout-converter
+Very useful script for ukrainians. It can convert text from wrong
+layout to correct layout
+
+*** lisp-case-text-format
+Converts ="^date Example TEXT"= to ="12072024-example-text"=. The script
+is very useful to name presentations or just send work to school
+teacher
+
+Here is table that shows what the script replaces
+| Combination   | Replacement                   |
+|---------------+-------------------------------|
+| ,             | SPACE                         |
+| :time         | time (%H%M)                   |
+| :date         | date (%d%m%Y)                 |
+| :ndate        | next (tomorrow) date (%d%m%Y) |
+| :sql-date     | sql date (%Y-%m-%Y)           |
+| :sql-datetime | sql datetime (%Y-%m-%Y %H:%M) |
+| SPACE         | -                             |
+| _             | -                             |
+| [:upper:]     | [:lower:]                     |
+
+*** minecraft-config-manager
+It takes minecraft version config from =$minecraftConfigsPath= and then
+it pastes the config to =$minecraftDirectory= and creates backup for
+previous config. It can be also applied for firejail minecraft
+directory (=$minecraftSandboxDirectory=) by running
+#+begin_src bash
+~/.config/scripts/dmenu/minecraft-config-manager sandbox
+#+end_src
+
+*** shutdown
+**** Description
+Shutdown script. It should have one of those parameters
+1) shutdown
+2) reboot
+
+**** Examples
+Shutdown
+#+begin_src bash
+~/.config/scripts/dmenu/shutdown shutdown
+#+end_src
+
+Reboot
+#+begin_src bash
+~/.config/scripts/dmenu/shutdown reboot
+#+end_src
+
+*** resources/internet-wait.sh
+It's not dmenu script, but it's script that is called from
+[[daemon-launcher][daemon-launcher]]. Just sends notification when internet appears
+
+** Get scripts
+Those are scripts to receive some system information. Useful for
+status bar. There are many of them, but i will describe unintitive
+
+*** layout/flag
+The script needs layout name as argument. You can get it from 
+=/usr/share/X11/xkb/rules/base.lst= file
+
+*** emacs/configs
+Used for emacs sxhkd keybindings. Get emacs configs from
+=$emacsProfiles=
+
+*** emacs/servers
+Used for emacs sxhkd keybindings. Get currently launched emacs servers
+
+** Cron scripts
+Notify scripts use [[notify][notify]] script. *If notification requires check, it
+should be separated script*
+
+*** 10-notify-doing-exercises
+It sends notification to go and go exercises with quantity when
+quantity is >= =$minimumQuantity=
+
+*** 20-notify-washing-nose
+Sends notification to wash nose if =$ill= set to =yes=
+
+*** 30-notify-laptop-change
+It sends notification about battery level if you have battery.
+On 30% it sends notification with low urgency. On 20% it sends
+with critical urgency
+
+*** [4-6]0-notify-smearing-[a-z]+
+They depend on =$wither[A-Z]+= variables in settings.conf. Here are they
+- witherHands
+- witherFace
+- witherLips
+
+*** 70-notify-moisten-nos
+Depends on variable =$witherNose=
+
+*** notify
+The script allows cron to send notifications.
+I made this script because i want to avoid repetition in crontab.
++ $1 - program name
++ $2 - message
++ $3 - urgency :: optional
+
+The script depends to =$enableCronNotifications= and on =$DNDtimeBegin=,
+=$DNDtimeEnd=, if =$enableDNDtime= set to yes.
+
+If slock is openned, it will send notifications with critical urgency 
+
+** Python scripts
+All python scripts use [[file:python-scripts.ini][python-scripts.ini]] configuration file
+
+*** leetcode-org-converter
+**** Description
+The script converts leetcode problem to org-mode document. It
+the document to =~/Coding/leetcode-problems/org=, but you can change
+it using =~/.files-balamah/py-scripts.ini=
+
+**** Examples
+To launch it, you need to use =lorg= alias
+
+The syntax looks like
+#+begin_src bash
+lorg two-sum
+#+end_src
+
+**** Variables
+- $language             :: gives you basic snippet in this language
+- $session, $csrf-token :: makes api working
+- $output-location      :: location where converter puts org document
+
+*** alarmDaemon
+It reads file =~/.alarms=. The syntax is described below
+
+#+begin_src conf
+# time - message
+16:00 - do something
+17:00 - become dumber
+#+end_src
+
+You can launch it using [[daemon-launcher][daemon-launcher]] dmenu script
+
+*** weather
+Depends on these variables
+- $owm-key
+- $units
+  + metric   :: °C
+  + imperial :: °F
+- $city
+  If set ^geocoder, weather script will get your current city.
+  WARNING: sometimes geocoder works like dogshit, and gets city where
+  you are not located
+
+** Emacs
+*** How does launch work
+My emacs config is located in =~/.config/emacs/mine= and chemacs
+launches the config. You can also launch multiple emacs configs
+by editing file =~/.config/emacs/profiles.local.el=. If this file
+doesn't exist, chemacs will use =~/.config/emacs/profiles.el=
+
+To start emacs server with other config, you need to launch "profile
+emacs" from daemon-launcher and then choose which emacs profile you
+want to launch. It gets profiles from =~/.config/emacs/profiles.el=. You
+can also set default profile by just putting profile name from
+=profiles.el= to =~/.config/emacs/default.el=
+
+To launch instance of config or just instance of server, you need to
+press ="S-C-h P"= and choose server.
+
+You can also use custom configuration by editing file
+=~/.config/emacs/mine/src/local.el=
+
+*** Functions and macros
+I've created some custom functions and macroses that will be useful in
+adventure. They are defined in "config/emacs/mine/config/functions.el".
+Here is list of them
+
+| Function name                   | Parameters                                            | What it does                                                          |
+|---------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------|
+| [[defrun, defrunc][defrun]]                          | function-name binary-name &optional is-only-file-name | Create interactive function with (run)                                |
+| [[defrun, defrunc][defrunc]]                         | function-name &rest body                              | Create interactive function with (run-prepare)                        |
+| [[global-bind][global-bind]]                     | keybindings-alist &optional prefix                    | Bind commands to keybindings sometimes using prefix                   |
+| [[map-bind][map-bind]]                        | keybindings-alist keymap &optional prefix             | Bind commands to keybindings for keymap sometimes using prefix        |
+| [[with-conf-variable][unless-conf-variable]]            | variable value &rest body                             | Execute depending on variable which should NOT be equal to value      |
+| [[with-conf-variable][with-conf-variable]]              | variable value &rest body                             | Execute depending on variable which should be equal to value          |
+| [[with-system][with-not-system]]                 | types &rest body                                      | Execute code if system is NOT in list                                 |
+| [[with-system][with-system]]                     | types &rest body                                      | Execute code if system is in list                                     |
+| copy-string-to-clipboard        | string                                                | Copy string to clipboard                                              |
+| get-only-file-name              | file-path                                             | Deletes directory from file path                                      |
+| pkbd                            | prefix keychord                                       | Create keybinding with prefix at start                                |
+| read-conf-variable              | file variable-name                                    | Read conf variable from file                                          |
+| read-file                       | file                                                  | Read file and assign contents to variable                             |
+| remove-prefix-to-first-space    | str                                                   | Remove everything before and including the first space in the string  |
+| source-shell-script-run-command | shell-config-file command                             | Source the shell script and run the command in the same shell process |
+| org-get-keyword-variable-value  | key                                                   | Get value from org-mode header                                        |
+
+**** with-system
+Type should be array of systems. Which looks like
+
+#+begin_src elisp
+(with-system '(gnu/linux)
+  (message "this is linoox"))
+#+end_src
+
+It was made to execute code more than one os
+#+begin_src elisp
+(with-system '(gnu/linux gnu/kfreebsd)
+  (message "if you see this message. You are on linoox or freebsd"))
+#+end_src
+
+with-not-system is similar to with-system, but reversed. If system is
+one of that is located in array, the code won't execute
+
+#+begin_src elisp
+(with-not-system '(windows-nt)
+  (message "this is not windows"))
+#+end_src
+
+It was made to execute code more than one os
+#+begin_src elisp
+(with-system '(gnu/linux gnu/kfreebsd)
+  (message "if you see this message. You are not on linoox or freebsd"))
+#+end_src
+
+**** with-conf-variable
+#+begin_src elisp
+(with-conf-variable "profile" "exwm"
+  (load "~/.config/emacs/mine/config/exwm.el"))
+#+end_src
+
+You can also reverse it by using =unless-conf-variable=
+#+begin_src elisp
+(unless-conf-variable "profile" "no-wm"
+  (set-frame-parameter nil 'alpha-background 93)
+  (add-to-list 'default-frame-alist '(alpha-background . 93)))
+#+end_src
+
+**** global-bind
+Example usage is here
+#+begin_src elisp
+(global-bind '(("C-4 C-f" . find-file-other-window)
+			   ("C-1" . delete-other-windows)
+			   ("C-o" . other-window)) "C-x")
+#+end_src
+
+**** map-bind
+#+begin_src elisp
+(map-bind '(("\C-a" . evil-first-non-blank)
+            ("\C-e" . end-of-line)
+            ("\C-n" . next-line)
+            ("\C-p" . previous-line)) evil-insert-state-map)
+#+end_src
+
+**** defrun, defrunc
+The macroses create functions that use =(run)= or =(run-prepare)=.
+Functions =(run)= execute shell commands in vterm, while functions
+with =(run-prepare)= just open window below and execute lisp code.
+Examples
+
+#+begin_src elisp
+;; Create function run-php that uses 'php' binary
+(defrun php "php")
+
+;; This creates function run-localhost that executes (eww "localhost")
+(defrunc localhost
+  (eww "localhost"))
+#+end_src
+
+*** Emacs custom functional
+**** Git sync
+It commits and pushes by pressing keybindings directories which are
+members of =git-sync-directories= list. Useful for org-mode directory
+sync, you have full sync while using git
+
+To add directory to sync, you need the directory to add to
+=git-sync-directories= list
+
+Here are suffix keybindings =a= (all) and =c= (current directory).
+Keybindings with suffix =a= affect *all* directories from =git-sync-directories=,
+while =c= affects only current directory. I will use =suffix= in keybindings
+
+To commit and push, you need to press =C-c S suffix=, to pull =C-c S P=
+
+**** Project config
+Project config can do many things. One best thing is entry point for
+some projects. For example, i want to launch symfony telegram bot,
+i don't want to create function for one project in my config, it is
+better to have per-project config. Prefix is =C-c p f=
+
+At first, you need to create =.emacs/config.el= by =C-c p f c=, and you
+can open configuration using =C-c p f o=. It is like =~/.zshrc= or
+=~/.bashrc=. Here you can specify entry points for projects, their
+plugins and keybindings. After configuration, you need load the config
+by pressing =C-c p f l=
+
+If =.emacs/config.el= presence annoyed you in your project, you can
+press =C-c p f d=
+
+***** Example
+#+begin_src elisp
+(setq current-project (project-get-root))
+
+;; run project
+(defun run-project ()
+  (interactive)
+
+  (run-prepare)
+  (let ((launcher (project-config-file-directory-get-path "launcher")))
+    (vterm-run (format "sh %s" launcher))))
+
+(global-set-key (kbd "S-<f10>") 'run-project)
+
+;; add snippets
+(let ((snippet-directory (project-config-file-directory-get-path "snippets")))
+  (add-to-list 'yas-snippet-dirs 'snippet-directory)
+  (yas-load-directory snippet-directory))
+#+end_src
+
+**** Org-discipline
+***** Description
+Gamification for org-mode. When this minor-mode enabled, function
+called =org-discipline-calculation-on-todo-write-file= is added to
+=org-after-todo-state-change-hook=. Basically, when you change header
+state to "DONE" using =(org-todo)=, it watches at task difficulty and
+skipped days count. If task is not skipped, stored money will be
+summed by profit. But if task is skipped for more than one day, it
+substracts stored money by sum of *skipped task* loss percentage and
+*difficulty* loss percentage. To explain it simplier, here is formula of
+it
+
+\begin{align}
+  \text{stored} -
+  \left( \frac{\text{stored}}{100} \times \text{loss}_1 + \text{loss}_2 \right)
+\end{align}
+
+Here are loss and profit percentage tables
+
+Loss according to difficulty
+| Difficulty | Percentage |
+|------------+------------|
+| easy       |        0.3 |
+| medium     |        0.2 |
+| hard       |        0.1 |
+
+Loss according to skipped days 
+| Days skipped | Percentage |
+|--------------+------------|
+| >= 10        |        0.3 |
+| >= 5         |        0.2 |
+| >= 2         |        0.1 |
+| < 2          |          0 |
+
+Profit according difficulty
+| Difficulty | Money count |
+|------------+-------------|
+| easy       |           5 |
+| medium     |          10 |
+| hard       |          15 |
+
+Xp count is stored in =org-discipline-xp-storage-file=
+
+***** Key chords
+| Keychord | Function                        |
+|----------+---------------------------------|
+| M-o D S  | org-discipline-get-skipped-days |
+| M-o D m  | org-discipline-get-stored-xp    |
+
+***** Enabling
+To enable this minor-mode, add in local.el this line
+#+begin_src elisp
+(setq org-discipline-mode t)
+(org-discipline-mode 1)
+#+end_src
+
+*** Configurable variables
+- =org-latex-previews-presentation-font-size=
+  Org LaTeX preview font size for when (enable-presentation-mode) is
+  running
+- =org-latex-previews-on-disable-font-size=
+  Org LaTeX preview font size for when (enable-presentation-mode)
+  stopped running
+- =transparency-level=
+  Transparency level for emacs. It is used in functions that set
+  transparency
+- =LaTeX-create-output-directory=
+  The variable determines whether to create 'LaTeX-output-directory' or not
+- =LaTeX-output-directory=
+  Directory for LaTeX compilation
+- =LaTeX-cflags=
+  LaTeX compilation flags
+- =LaTeX-compiler=
+  Compiler for LaTeX compilation
+- =git-sync-directories=
+  Directories for git-sync
+- =git-sync-keybinding-prefix=
+  Prefix for git-sync keybindings
+- =project-config-file-no-file-message=
+  project-config-file-open and project-config-file-load show the
+  message when project doesn't have .emacs/config.el
+- =project-config-file-keybinding-prefix=
+  Prefix for project-config-file-* keybindings
+- =bookmark-indent-offset=
+  Indentation offset for 'bookmark-mode'
+- =bookmark-align-column=
+  Column at which the second column should start in 'bookmark-mode'
+- =open-bookmark-file=
+  Bookmark file to open bookmark
+- =org-discipline-xp-storage=
+  Org-mode storage for discipline xp
+- =org-discipline-prefix=
+  Org-discipline keybindings prefix
+- =org-discipline-xp-sum=
+  Current amount of XP the user has accumulated
+- =org-discipline-required-starting-xp=
+  Base amount of XP required to level up in the discipline system.
+  This value may increase with each level by org-discipline-xp-sum
+- =emacs-font-free= :: Emacs font on free systems
+- =emacs-font-nt=   :: Emacs font on nt systems
+
+*** Emacs scripts
+They are stored in =config/scripts/emacs= and here is their description
+
+**** org-presentation-export
+Take photos in =$emacsOPEworkdir=, compile to pdf and put in
+=$emacsOPEoutputdir=, if the script doesn't have =--photos-only=
+at the end
+
+Parameters
+- $1		:: buffer-file-name
+- $2		:: PRESENTATION_EXPORT_NAME (optional)
+- ${@: -1}	:: --photos-only (optional)
+
+Depends on
+- $emacsOPEcopyOutputPath
+- $emacsOPEoutputdir
+- $emacsOPEworkdir
+
+** Shell functions
+These functions are used in many scripts and defined [[file:config/scripts/functions.sh][here]]
+
+*** rip
+Rips spaces from beginning and end of the string. It looks ugly when
+you open recents and you see spaces around.
+
+It will convert this =" some string "= to ="some string"=
+
+*** toggle
+Toggle values. The chain of toggle looks like =1 -> 2 -> 3 -> 1 -> ...=.
+Every time it switches to the next element and if element is last,
+then it will switch the the first element
+
+Parameters
+- $1 :: list (using ,). Like "1,2,3,4,5"
+- $2 :: storage file
+
+*** ttoggle
+Toggle 2 values, and second variable can be changed.
+First element should be constant, and other can be changed,
+if element is not equal to the first, it switches to the first.
+It works like: "first element -> ? -> first element -> ...".
+
+Parameters
+- $1 :: list (using ,)
+- $2 :: storage file
+
+*** includeFiles
+Used for function br to include bookmark files It's recursion.
+br {include -> br}
+
+*** fl
+Get first letters for key in bookmark ALL expression
+
+*** bfl
+Format lines for ALL expression. Which is Bookmark Format Lines
+
+*** bfad
+Shortened from Bookmark Format ALL Directory. Find the files with
+pattern and formats to bookmark
+
+*** getColumn
+Simplified awk.
+
+Parameters
+- $1 :: string
+- $2 :: column number
+- $3 :: separator (optional)
+
+*** readALL
+Make ALL expression working
+
+*** br
+Shortened from Bookmark Read. Deletes comments and empty lines,
+includes bookmark files and formats ALL expressions
+
+*** colorScript
+Run random color script from =~/.config/scripts/additional/color-scripts=.
+
+Parameters
+- $1 :: don't clear the screen
+
+*** isPywalEnabled
+Check if pywal is enabled
+
+*** isPywalColorscheme
+Check if pywal is current colorscheme
+
+*** printParameters
+Print parameters from script, it will print only those lines
+#+begin_src shell
+# $1 :: program name
+# $2 :: message
+# $3 :: urgency (optional)
+#+end_src
+
+Like this
+#+begin_example
+$1 :: program name
+$2 :: message
+$3 :: urgency (optional)
+#+end_example
+
+** Dots utility
+There is also utility that can update my dots and rebuild something
+
+*** Add new package to installation
+Packages should be added like that because i like when all packages
+in =~/.files-balamah/install/pkg-list= are sorted alphabetically. Also
+it looks cool to do like that. To add packages, run command
+
+#+begin_src bash
+dots add-pkg distro package-name
+#+end_src
+
+Example is here:
+#+begin_src bash
+dots add-pkg gentoo sys-apps/cyme 
+#+end_src
+
+*** Update cron in dots
+Crontab is not linked from =auto/crontab= to =/var/spool/cron/$USER=
+unfortunately, for crontab won't work. To update crontab inside
+dots after running `crontab -e`, you can simply run
+
+#+begin_src bash
+dots crontab-update
+#+end_src
+
+It just reads crontab file on your machine and redirects output to
+=auto/crontab=
+
+*** Change flatpak permissions
+After you changed =flatpakHomePermission= inside =settings.conf=, you may
+apply the changes. To do it, you need to use
+
+#+begin_src bash
+dots flatpak-permissions-change
+#+end_src
+
+*** Recompile software
+Just software recompilation inside =~/.config/compile=
+
+#+begin_src bash
+dots software-recompile
+#+end_src
+
+*** Update
+To update my dotfiles, it is better to use =update= command, for it
+can guide you what to do and it links everything new
+
+#+begin_src bash
+dots update
+#+end_src
+
+** Configuration
+Here are 2 configuration files for my dotfiles they can configure many
+things
+
+*** settings.conf
+**** Installation
+- =$distro=
+  Variable determines which package manager to use and what to install
+- $flatpakRWpermission  :: allow reading directories =$flatpakRWdirectories=
+- $flatpakRWdirectories :: directories that will be read
+- $flatpakRWprograms    :: programs that will read =$flatpakRWdirectories=
+- =$createXsession=
+- =$deleteJunk=
+- =$linkSystemFiles=
+  Link files for /etc/ and /usr/
+- =$profile=
+  Profile determines which packages to install.
+  Also it is option to choose window manager.
+  Here are available profiles:
+  - bspwm
+  - dwm
+  - exwm
+  - xmonad
+    This profile is for servers or desktop environments
+
+  If you changed your profile, you need to run command
+  #+begin_src shell
+  dots install-profile-packages
+  #+end_src
+- =$createHome=
+  Creates my home structure
+  $HOME
+  + Coding
+    * learning
+    * leetcode-problems
+    * projects
+  + Documents
+  + Downloads
+  + Images
+  + JIC
+  + Org
+  + Tools
+    * make
+    * suckless
+  + Transfer
+    * books-send
+    * documents
+      * school-books
+    * images
+    * other
+    * school
+  + Video
+    * recorded
+      * footages
+- =$cloneWallpaperRepo=
+  It clones my wallpaper repo: https://github.com/balamah/wallpapers.
+  WARNING: it has weight over 600 MB
+- =$installAurPackages=
+  Install packages from =~/.files-balamah/install/pkg-list/user-packages/arch/aur-packages=,
+  if set to yes
+- =$enableTmuxPlugins=
+  If set to yes, installation script will install tpm, the tmux plugin
+  manager
+
+**** Directories
+- $standardBookmarksPath     :: if $bookmarksPath is empty, this variable is used
+- $bookmarksPath             :: path for [[bookmarks][bookmarks]] dmenu script
+- $keyboardProfilesDirectory :: profiles for =ckeyboard= daemon from [[daemon-launcher][daemon-launcher]]
+- $minecraftConfigsPath      :: minecraft configs
+  Structure should look like
+  + 1.12.2-xlie-servers
+    * options.txt
+    * optionsof.txt
+  + 1.16.5
+    * options.txt
+    * optionsof.txt
+  + 1.18.2
+    * options.txt
+    * optionsof.txt
+  + 1.18.2-fabric
+    * options.txt
+  + 1.20.4-mcc
+    * options.txt
+    * optionsof.txt
+- $minecraftDirectory        :: directory for [[minecraft-config-manager][minecraft-config-manager]]
+- $minecraftSandboxDirectory :: also directory for [[minecraft-config-manager][minecraft-config-manager]]
+- $packagesList              :: packages list for installation script
+- $wslPackagesList           :: wsl packages list for installation script
+- $servicesListPath          :: services actions for installation script
+- $vpnWireguardPath          :: vpn configurations path
+- $wallpapersPath            :: wallpaper path for [[30-set-wallpaper][30-set-wallpaper]]
+
+**** Scripts
+- default
+  + [[app-audio-control][app-audio-control]]
+    * $appRewindAmount
+    * $appRadicalRewindAmount
+    * $appVolumeAmount
+    * $appLoopStages
+  + connection-test          :: $connectionTestWebsite
+  + kill-programs
+    * $killProgramsList      :: kill using =pkill -f=
+    * $hardKillProgramsList  :: kill using =killall -9=
+  + notify-keymap-change     :: $layouts
+    You can get layouts from file /usr/share/X11/xkb/rules/base.lst.
+    To update keyboard config, select from daemon-launcher keyboard
+    config
+  + run-spotify              :: $enableSpotifyFlatpak
+  + [[volume-control][volume-control]]
+    * $volumeAmount
+    * $enableLimitVolume :: limits volume to 100%
+  + [[wal-sync][wal-sync]]                 :: $colorscheme
+  + webcam-launch            :: $videoSize
+- cron
+  + 10-notify-doing-exercises :: $minimumQuantity
+  + 20-notify-washing-nose    :: $runnyNose
+  + 40-notify-smearing-arms   :: $witherHands
+  + 50-notify-smearing-lips   :: $witherLips
+  + 60-notify-smearing-face   :: $witherFace
+  + 70-notify-moisten-nose    :: $witherNose
+  + notify
+    * $enableCronNotifications
+    * $enableDNDtime
+- dmenu
+  + bookmarks                :: $bookmarksPath
+  + minecraft-config-manager
+    * minecraftConfigsPath
+    * minecraftDirectory
+    * minecraftSandboxDirectory
+  + wireguard-vpn-connect    :: $vpnWireguardPath
+- emacs
+  + $emacsConfigs
+  + $emacsDashboardOption
+  + $emacsEnableCompanySnippetsLaTeX
+  + $emacsEnableOrgTrello
+  + $emacsEnableTetris
+  + $emacsEnableWarnings
+  + $emacsOPEcopyOutputPath
+  + $emacsOPEoutputdir
+  + $emacsOPEworkdir
+  + $emacsProfiles
+  + $enableEmacsDaemon
+  + $emacsFileSymlinkPreserve
+  + $emacsFileSymlinkPreserveDirectories
+  + $emacsFileGlobalSymlinkPreserve
+  + $emacsAlternateTheme
+- functions.sh
+- get
+  + emacs/config :: $emacsProfiles
+- startup
+  + startup/00-programs-launch
+    * $profile
+    * $enableEmacsDaemon
+    * $enableCustomSxhkdrc
+    * $customSxhkdrc
+  + startup/10-keyboard-config
+    * $enableKeyboardConfig
+    * $profile
+    * $enableOpenrgb
+    * $layoutMethodChange
+    * $enableNumlockStart
+  + startup/30-wallpaper-set
+    * $enableWallpapers
+    * $wallpapersPath
+    * $enableBrightWallpapersMorning
+    * $brightWallpapersLimitTime
+  + startup/40-panel-indicators
+    * $panelIndicatorsVariation
+    * $profile
+  + startup/50-compositor-start
+    * $enablePicom
+    * $colorscheme
+    * $enableBlur
+    * $picom
+    * $transparencyWithoutPywal
+
+**** Colorscheme
+You can see available colorschemes in =config/colorschemes=. To
+update colorscheme, press s-<f5>, but it is better to restart
+everything, for everything will be applied. To add colorscheme,
+you need to create =config/colorschemes/colorscheme.Xresources= and
+config/colorschemes/pywal/colorscheme.json=.
+First file adds colorscheme for dmenu, dwm, st and other programs,
+it should define
+- background
+- foreground
+- *color[0-66]
+- .*color[0-66]
+
+The other file is pywal template, it is useful for firefox and
+telegram synchronization
+
+So, you need to update those files in order to add new colorscheme
+- config/colorschemes/colorscheme-name.Xresources :: general colorscheme
+- config/colorschemes/pywal/colorscheme-name.json :: colorscheme for programs
+- config/nvim/lua/plugins/ui.lua                  :: neovim
+  Add the plugin and condition to load the theme
+  #+begin_src lua
+  {
+     'shaunsingh/colorscheme.nvim',
+     config = function ()
+            if settings["colorscheme"] == "colorscheme" then
+                   vim.cmd[[colorscheme colorscheme]]
+            end
+     end
+  }
+  #+end_src
+- config/emacs/mine/editor-config.org             :: emacs
+  Update =(get-theme)= switch case
+- config/scripts/tmux/load-theme                  :: tmux
+  Add new function to load the plugin and switch case
+
+*** python-scripts.ini
+- leetcode-org-converter
+  + language
+  + session
+  + csrf-token
+  + output-location
+  + debug
+- weather
+  + owm-key
+  + url-api-now
+  + city
+  + units
+- passwdgen :: allow-special-symbols

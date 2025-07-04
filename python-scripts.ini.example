@@ -1,0 +1,28 @@
+[leetcode-org-converter]
+session = 1j2Xk0bqU6Td5P1falwuNuIrwLygcGJOPkASeXwHGULNceAX2MG7EUOxSzZp8SZhJiWxJ6PCsghcDD98SxWStMLAciZIrNX84ltq09FjTb0PUUtLXpvrtrd9pj7rikGXRwz2nqrhNYtYJpAXVdcNqHGlx9gGhAjgVwJdmM403N2RY6891b1UX2qxBaFO1LMVXvpU5SKYCLnJ0A.2Nj2ClY7dc6aa9Njc.o0GMNGIhDUhJ.5uXK7xww3AAzCwzhUuotiTD3xkjC2OXwwS9rtnkTA9qkSDj1LePcQ6MPNLHz2VtFarPLvVbEnvTuqgdn1XfgY8cqC1gVel64nUuvkvd1RSSqX5HKL2qZjNsqwbieaXzOylLAW7i2.v9ORJPZpgkqPiwC6EdMGMppJf3srlSrr7.t.z4YP3ZeKnN5SFEQrWRGLsWQJMsvUuQZMG0h2eCP3.OccnOPFcgQ3ruRgL4ejbjQvSNT6btmC5hsMrGd0iicqUg2LnWCB9b0sWl48.5sjLCY7sGlxOhB.UEXnwj9vC9u5d.D0GjVJE0dHTAMpMkMBbg34Lx8PtGPLJKInEKZmTqtDSuWBH4V1kHNN49WistQY046NE17iA8olZQiOCoJFOBL42PMo.Fd6RsUkTKYrfBYOP1t14zM7XbQYyWu.N8A7Yx5GMxqR6Yng5k.6s5P1CKCPbYaSNgUKthdQvaJVFGP122yXqRX57P6GxznzTI6CBmev4fvhRB0SSwJm
+csrf-token = hifD3vkNnr4IBFvKRYV9kiqjIJbbbrVHyhDoOAGxON4ZmyKHwhRtb68TfLTAHQw
+output-location = ~/Coding/leetcode-problems/org/
+debug = false
+# Programming language for a basic code snippet
+language = php
+
+[crypt]
+# no	:: 00990114012101120116010101001 
+# yes	:: e[e[o;o;e[n)n)eIe[n)c%n)e[n)n)c%e[n)n)-;e[n)e[n)e[n)e[e[[ 
+letters-crypt = no
+
+[weather]
+owm-key = 6tIzi3O1o5sPoY7yx9nVkFhQP1lb0m5
+url-api-now  = http://api.openweathermap.org/data/2.5/weather?q=
+
+# If set to ^geocoder, weather script will get your current city.
+# WARNING: sometimes geocoder works like horrbile, for it gets city
+# where you are not located. Also it can be irritating with vpn usage
+city = ^geocoder
+# metric: °C
+# imperial: °F
+units = metric
+
+[passwdgen]
+# Allows symbols in password like: !@#$%^&*;'
+allow-special-symbols = yes

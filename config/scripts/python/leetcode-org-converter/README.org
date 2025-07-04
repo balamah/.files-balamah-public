@@ -1,0 +1,32 @@
+#+TITLE: README
+#+AUTHOR: Miha Balandin
+
+* Introduction
+This is horrible =leetcode problem to org converter=. I created it
+for macos tiling sucked back then when i used it and i wanted to
+improve problems appearance
+
+* Preparation
+At first, go to =~/.files-balamah= and run
+#+begin_src bash
+pip install -r requirements.txt
+#+end_src
+
+Then, you need to edit file =~/.files-balamah/py-scripts.ini=. It this
+file, you need to change =LEETCODE_SESSION= and =LANGUAGE=. To get
+=LEETCODE_SESSION=, you need to see leetcode cookies and search for
+=session=.
+
+* How it works
+=ApiOutput= sends api request to leetcode using graphql and returns in
+output in =dict= type. All magic happends in =Convert=. The class converts
+=html= to =org= using sed
+
+* Running
+To run the converter, run command
+#+begin_src shell
+python3 path/to/leetcode-org-converter/main.py leetcode-problem-name
+#+end_src
+
+Instead of =leetcode-problem-name= you need to insert problem name from
+problem link. Like: two-sum, merge-k-sorted-list

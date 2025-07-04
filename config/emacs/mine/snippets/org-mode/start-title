@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: start-title
+# key: <t
+# --
+
+#+TITLE: ${1:title}
+
+$0

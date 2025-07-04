@@ -1,0 +1,15 @@
+󰈹 firefox           firefox
+󰓇 spotify           com.spotify.Client
+ telegram          org.telegram.desktop
+ viber             com.viber.Viber
+󰓓 steam             com.valvesoftware.Steam
+󰏆 onlyoffice        org.onlyoffice.desktopeditors
+ zoom              us.zoom.Zoom
+ emacs             emacsclient#-c
+ emacs default     emacs
+ vim               vim
+ neovim            nvim
+ ranger            ranger
+ nemo              nemo
+ htop              htop
+󰛳 nmui              nmtui

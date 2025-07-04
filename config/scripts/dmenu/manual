@@ -1,0 +1,9 @@
+#!/bin/sh
+
+unitility=$(man -k . | sort | \
+			dmenu -i -l 20 -p " Choose manual to read" | awk '{print $1}')
+
+[ -z "$unitility" ] && exit 1
+
+/usr/local/bin/st -e man $unitility || \
+	notify-send "${0##*/}" "no manual entry for $unitility"

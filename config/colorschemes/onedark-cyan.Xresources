@@ -1,0 +1,13 @@
+! -*- mode: conf-xdefaults -*-
+
+dwm.color0:		#282C34
+dwm.color1:		#ABB2BF
+dwm.color6:		#56B6C2
+dwm.color14:	#ABB2BF
+
+dmenu.color0:	#282C34
+dmenu.color6:	#56B6C2
+dmenu.color14:	#56B6C2
+
+#include "./general/onedark/colors.Xresources"
+#include "./general/onedark/st.Xresources"

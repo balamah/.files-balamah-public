@@ -1,0 +1,18 @@
+#!/bin/sh
+
+[ ! -d /sys/class/power_supply ] && exit
+
+notify() {
+	[ -z "$1" ] && echo '$@ should be notification parameters' && return 1
+
+	~/.config/scripts/cron/notify "${0##*/}" "$@" && exit
+}
+
+batteryCatalog=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | \
+				 grep native-path | awk '{print $NF}')
+
+charge=$(cat /sys/class/power_supply/$batteryCatalog/capacity)
+
+message="battery charge is below"
+[ "$charge" -lt 20 ] && notify "$message 20%" critical 'yes'
+[ "$charge" -lt 30 ] && notify "$message 30%" low 'yes'

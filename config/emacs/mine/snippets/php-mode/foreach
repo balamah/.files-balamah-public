@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: foreach
+# key: fore()
+# --
+
+foreach (${1:array} as ${2:value}) {
+	$0
+}

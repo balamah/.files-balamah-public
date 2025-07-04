@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: LaTeX-document
+# key: $$%
+# --
+
+\begin{document}
+  $0
+\end{document}

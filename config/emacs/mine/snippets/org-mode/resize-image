@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: resize-image
+# key: resize:::
+# --
+
+#+ATTR_ORG: :width $0

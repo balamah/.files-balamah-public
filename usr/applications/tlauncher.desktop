@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=tlauncher
+Exec=firejail --profile=tlauncher bash -c "java -jar ~/Programs/bin/TLauncher-2.895.jar"
+Terminal=false
+Type=Application

@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: first line
+# key: <?
+# --
+
+<?php
+
+declare(strict_types=1);
+
+$0

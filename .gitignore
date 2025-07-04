@@ -1,0 +1,141 @@
+# global
+*~*
+*#*
+*.tmp
+*.tmp.*
+*.log
+*.swp
+*.eld
+__pycache__/
+node_modules/
+.DS_Store
+
+# ide specific
+.idea/
+.vscode
+venv/
+ltximg/
+
+# home
+home/.fonts/.uuid
+
+# emacs
+home/.emacs.d/.cache/
+home/.emacs.d/.dap-breakpoints
+home/.emacs.d/.extension/
+home/.emacs.d/.lsp-session-v1
+home/.emacs.d/ac-comphist.dat
+home/.emacs.d/lsp-cache/
+home/.emacs.d/recentf
+home/.emacs.d/straight/
+home/.emacs.d/transient/
+
+config/emacs/mine.zip
+config/emacs/mine/.cache/
+config/emacs/mine/.dap-breakpoints
+config/emacs/mine/.extension/
+config/emacs/mine/org-persist/
+config/emacs/mine/.lsp-session-v1
+config/emacs/mine/.org-generic-id-locations
+config/emacs/mine/.trash/
+config/emacs/mine/.trello
+config/emacs/mine/ac-comphist.dat
+config/emacs/mine/anaconda-mode/
+config/emacs/mine/auto-save-list/*
+config/emacs/mine/backups/*
+config/emacs/mine/bookmarks
+config/emacs/mine/bookmarks-not-shit
+config/emacs/mine/bootmarks
+config/emacs/mine/src/local.el
+config/emacs/mine/eclipse.jdt.ls/
+config/emacs/mine/ellama-sessions/
+config/emacs/mine/eln-cache/29.3-ffcb1460/
+config/emacs/mine/elpa.bak/
+config/emacs/mine/elpa.zip
+config/emacs/mine/elpa/
+config/emacs/mine/eshell/
+config/emacs/mine/games/*
+config/emacs/mine/image-dired/
+config/emacs/mine/lsp-cache/
+config/emacs/mine/oauth2-auto.plist
+config/emacs/mine/org-roam.db
+config/emacs/mine/persist/
+config/emacs/mine/projects
+config/emacs/mine/recentf
+config/emacs/mine/request
+config/emacs/mine/straight/*
+config/emacs/mine/test.*
+config/emacs/mine/tramp
+config/emacs/mine/transient/
+config/emacs/mine/tutorial/*
+config/emacs/mine/url/
+config/emacs/mine/var/
+config/emacs/mine/workspace/
+config/emacs/mine/eln-cache/
+config/emacs/mine/easysession/
+config/emacs/mine/.emacs-workgroups
+config/emacs/mine/.org-money-currency
+config/emacs/mine/.org-xp
+config/emacs/mine/.lsp-session-v1.bak
+config/emacs/mine/logview-cache.extmap
+
+config/emacs/profiles/*
+config/emacs/default.el
+config/emacs/profiles.local.el
+
+# compilation
+config/compile/*/build/
+config/compile/dmenu/dmenu
+config/compile/dwm/dwm
+config/compile/slock/slock
+config/compile/st/st
+config/compile/stest/stest
+config/compile/tabbed/tabbed
+config/compile/dwmblocks/dwmblocks
+config/compile/sxw/bin
+config/compile/sxw/obj
+config/compile/sxw/src/a
+stest
+*.o
+*.orig
+*.rej
+
+# config
+config/OpenRGB/logs
+config/coc
+config/flameshot/flameshot.ini
+config/nvim/autoload
+config/nvim/lazy-lock.json
+config/scripts/*/*.ignore*
+config/scripts/*/*.tmp*
+config/shell/zsh/local-aliases.zsh
+config/shell/local-aliases.zsh
+config/shell/zsh/plugins/*
+config/zsh/local-aliases.zsh
+
+# desktop entries
+usr/applications/ready/*
+
+# obs
+config/obs-studio
+
+## Some files are ignored because i want to sync
+## them with pywal using some scripts.
+## configs with .base are configs that will be synced
+config/zathura/zathurarc
+
+# init
+init/dotfiles-balamah.desktop
+
+# installation
+install/yay/
+
+# root
+.vim/
+.pull-output
+settings.conf
+python-scripts.ini
+
+# junk after installation
+config/scripts/scripts 
+home/.emacs.d/config/config

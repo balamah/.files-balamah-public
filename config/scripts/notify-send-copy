@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# The script sends notification and copies to clipboard.
+# $1 :: script name
+# $2 :: notification with value
+# $3 :: value that copies to clipboard
+
+. ~/.files-balamah/config/scripts/functions.sh 
+
+[ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] && printParameters && exit 1
+
+notify-send "$1" "$2"
+echo "$3" | xclip -selection clipboard -r

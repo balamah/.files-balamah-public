@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. ~/.files-balamah/install/modules/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+[ "$profile" = 'dwm' ] || [ "$profile" = 'no-wm' ] && exit
+
+command=$(getPackageManager)
+
+eval sudo "$command" $(cat $packagesList/profiles/$profile/$distro | rmodd)

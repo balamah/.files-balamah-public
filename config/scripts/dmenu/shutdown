@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# The script halts or reboots pc.
+# $1 :: [shutdown, reboot]
+
+. ~/.files-balamah/config/scripts/functions.sh 
+
+[ -z "$1" ] && printParameters && exit 1
+
+decision=$(printf "no\nyes" | dmenu -p " Are you sure that you want to $1?")
+
+[ "$decision" != "yes" ] && exit
+
+case "$1" in
+	"shutdown") shutdown now	;;
+	"reboot")	shutdown -r now ;;
+esac

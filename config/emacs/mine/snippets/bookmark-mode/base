@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: bookmark-base
+# key: <b
+# --
+
+!COMMAND: ${1:program name}
+
+$0

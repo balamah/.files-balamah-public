@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# server=$(ps aux | grep 'emacs --with-profile' | \
+			 # sed "/grep/d;s/.*--daemon=//;s/ --debug-init//" | \
+			 # dmenu -p ' Choose emacs server to start client')
+
+# [ -z "$server" ] && exit
+
+# echo "$server"
+
+ps aux | grep 'emacs --with-profile' | sed "/grep/d;s/.*--daemon=//;s/ --debug-init//"

@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: route
+# key: route:::
+# --
+
+#[Route('/${1:route-name}', name: 'app_${1}')]
+public function ${1}(): Response
+{
+	$0
+}

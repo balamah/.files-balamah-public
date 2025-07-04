@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: start-agenda
+# key: <a
+# --
+
+#+TITLE: ${1:title}
+#+FILETAGS: ${2:tags}
+#+ARCHIVE: ~/Org/archived/%s_archive::
+
+$0

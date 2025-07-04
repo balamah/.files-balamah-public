@@ -1,0 +1,59 @@
+# -*- mode: bookmark -*-
+!COMMAND: ~/.local/bin/tabbed-st ranger
+
+# config
+cs                ~/.config/scripts
+cse               ~/.config/scripts/emacs
+csa               ~/.config/scripts/additional
+csc               ~/.config/scripts/cron
+css               ~/.config/scripts/startup
+csg               ~/.config/scripts/get
+csd               ~/.config/scripts/dmenu
+csds              ~/.config/scripts/dmenu/sxiv
+csdr              ~/.config/scripts/resources/dmenu
+csdrb             ~/.config/scripts/resources/dmenu/bookmarks
+csdrm             ~/.config/scripts/resources/dmenu/minecraft-configs
+csp               ~/.config/scripts/python
+cspw              ~/.config/scripts/python/weather
+cspl              ~/.config/scripts/python/leetcode-org-converter
+
+# suckless
+sd                ~/.config/compile/dwm
+ss                ~/.config/compile/st
+sD                ~/.config/compile/dmenu
+sta               ~/.config/compile/tabbed
+
+# scripts      
+S                 ~/.config/scripts
+Sg                ~/.config/scripts/get
+Ss                ~/.config/scripts/startup
+Sp                ~/.config/scripts/python
+Sd                ~/.config/scripts/dmenu
+Sdr               ~/.config/scripts/resources/dmenu
+Sdrb              ~/.config/scripts/resources/dmenu/bookmarks
+Sdrm              ~/.config/scripts/resources/dmenu/macros
+
+# neovim       
+N                 ~/.config/nvim/
+Nl                ~/.config/nvim/lua/
+Nlc               ~/.config/nvim/lua/config/
+Nlp               ~/.config/nvim/lua/plugins/
+
+# other        
+cf                ~/.config
+
+# dotfiles     
+D                 ~/.files-balamah
+Di                ~/.files-balamah/install
+Dip               ~/.files-balamah/install/pkg-list
+Dim               ~/.files-balamah/install/modules
+DI                ~/.files-balamah/init
+Dc                ~/.files-balamah/config
+Dh                ~/.files-balamah/home
+De                ~/.files-balamah/config/emacs
+Dem               ~/.files-balamah/config/emacs/mine
+Dems              ~/.files-balamah/config/emacs/mine/src
+
+# temporary
+T               /tmp
+!ALL: | /tmp/.files-balamah | d | * | Tf

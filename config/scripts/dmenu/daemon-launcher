@@ -1,0 +1,47 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+notify() {
+    notify-send "${0##*/}" "$1"
+}
+
+daemon=$(cat ~/.config/scripts/resources/dmenu/daemons | \
+	     dmenu -p " Choose daemon to launch" -l 20 -i | awk '{print $2}')
+
+emacsDaemon() {
+	emacs --with-profile default --daemon=default --debug-init && \
+		notify "emacs daemon successfully launched" || \
+		notify "emacs daemon failed to launch"
+}
+
+emacsProfileDaemon() {
+	daemon=$(~/.config/scripts/get/emacs/config)
+
+	[ -z "$daemon" ] && return
+
+	emacs --with-profile "$daemon" --daemon="$daemon" --debug-init && \
+		notify "emacs daemon with profile '$daemon' successfully launched" || \
+		notify "emacs daemon with profile '$daemon' failed to launch"
+}
+
+panelIndicators() {
+	ps aux | grep 'bash.*40-panel-indicators' | awk '{print $2}' | xargs -r kill || \
+		killall -9 dwmblocks
+
+	~/.config/scripts/startup/40-panel-indicators 
+}
+
+case $daemon in
+	"alarm") ~/.config/scripts/python/alarmDaemon.py ;;
+	"keyboard") ~/.config/scripts/startup/10-keyboard-config ;;
+	"warpd") ~/.local/bin/warpd ;;
+	"picom") ~/.config/scripts/startup/50-compositor-start ;;
+	"sekiro") ~/.local/bin/sekirofpsunlock 0 set-fps 75 ;;
+	"emacs") emacsDaemon ;;
+	"profile") emacsProfileDaemon ;;
+	"dunst") dunst ;;
+	"internet") ~/.config/scripts/resources/dmenu/internet-wait.sh ;;
+	"panel") panelIndicators ;;
+	"ckeyboard") ~/.config/scripts/dmenu/keyboard-profile-choose ;;
+esac

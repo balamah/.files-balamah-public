@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# The script takes parameter program name. 
+# Spaces should be replaced to #.
+# The chain of opening program is looking like:
+# flatpak -> gtk -> st -> eval
+# If something fails, it goes forward
+
+[ -z "$1" ] && exit 1
+[ "$1" = "com.spotify.Client" ] && ~/.config/scripts/run-spotify && exit
+
+app=$(echo "$1" | sed 's/\#/ /g')
+
+flatpak run "$app" || \
+	gtk-launch "$app" || \
+	st -e "$app" || \
+	eval "$app"

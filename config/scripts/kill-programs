@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+killList() {
+	echo "$1" | sed "s/,/\n/g" | \
+		while read program; do
+			[ "$2" = 'hard' ] && \
+				killall -9 "$program" || \
+				pkill -f "$program"
+		done
+}
+
+killList "$killProgramsList"
+killList "$hardKillProgramsList" 'hard'
+
+notify-send "${0##*/}" 'Programs were successfully killed'

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# install libraries
+cat ~/.files-balamah/install/packages-install/pkg-list/debian.pkg-list | sudo apt-get install -
+
+# install my daily apps
+sudo flatpak install com.spotify.Client \
+	com.valvesoftware.Steam \
+	org.telegram.desktop \
+	com.discordapp.Discord \
+	com.viber.Viber \
+	us.zoom.Zoom \
+	org.onlyoffice.desktopeditors
+
+# install python libraries for weather and firefox
+pip install requests geocoder pywalfox pywal --break-system-packages
+python3 -m pywalfox install

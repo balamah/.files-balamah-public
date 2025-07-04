@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# The script requires action as argument
+# if action is empty then script will do nothing.
+# If you want to increase decrease player volume, use + or -.
+# Or if you want to rewind, use rewind and + or -.
+# $1 :: parameters from README
+
+. ~/.files-balamah/config/scripts/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+[ -z "$1" ] && printParameters && exit 1
+
+playerctlDirectory=/tmp/.files-balamah/playerctl
+
+getPlayer() {
+	playerctl metadata --format "{{ playerName }}"
+}
+
+getNewPosition() {
+	[ -z "$1" ] && return 1
+
+	[ -z "$2" ] && \
+		string="% $1 $appRewindAmount" || \
+		string="% $1 $appRadicalRewindAmount"
+
+	playerctl -p playerctld position | xargs -I "%" echo "$string" | bc
+}
+
+getNewVolume() {
+	[ -z "$1" ] && return 1
+
+	newVolume=$(playerctl -p playerctld volume | xargs -I "%" \
+					echo "% $1 $appVolumeAmount" | bc | cut -c 1-2)
+
+	echo "$newVolume" | tee $playerctlDirectory/volume/$(getPlayer)
+}
+
+changePlayer() {
+	[ -z "$1" ] && return 1
+
+	eval playerctld "$1"
+
+	image="$HOME/.config/scripts/resources/images/app-audio-control/%.png"
+
+	playerctl metadata --format "{{ playerName }}" | xargs -I "%" \
+		dunstify -r 1234 -u low -t 1000 -I "$image" \
+			"${0##*/}" "Player has been changed to %" 
+}
+
+loop() {
+	player=$(getPlayer)
+	loopFile=$playerctlDirectory/loop/$player
+
+	stage=$(toggle "$appLoopStages" "$loopFile")
+
+	playerctl -p playerctld loop "$stage"
+
+	dunstify -r 5252 -u low "${0##*/}: $player" "looping: $stage"
+}
+
+shuffle() {
+	player=$(getPlayer)
+	stagesFile=$playerctlDirectory/shuffle/$player
+
+	stage=$(toggle Off,On "$stagesFile")
+
+	playerctl -p playerctld shuffle "$stage"
+
+	dunstify -r 6262 -u low "${0##*/}: $player" "shuffle: $stage"
+}
+
+mute() {
+	player=$(getPlayer)
+	muteFile=$playerctlDirectory/mute/$player
+	previousVolume=$(cat $playerctlDirectory/volume/$player)
+
+	volume=$(ttoggle $previousVolume,0 $muteFile)
+
+	playerctl -p playerctld volume $volume
+}
+
+case "$1" in
+	"+"|"-") getNewVolume "$1" | xargs -I "%" playerctl -p playerctld volume "0%" ;;
+	"rewind") getNewPosition "$2" "$3" | xargs playerctl -p playerctld position ;;
+	"shift") changePlayer "$1" ;;
+	"loop") loop ;;
+	"shuffle") shuffle ;;
+	"mute") mute ;;
+	*) playerctl -p playerctld "$1" ;;
+esac

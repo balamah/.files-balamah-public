@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: human-in-list
+# key: *:human
+# --
+
+* HUMAN ${1}
+:PROPERTIES:
+:relationship: ${2}
+:hobbies: ${3}
+:isClassmate: ${4}
+:birthday: ${5}
+:race: ${6}
+:END:
+
+** Characteristics 
+** History
+** Weak spots

@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: human-tags
+# key: htags:::
+# --
+
+:PROPERTIES:
+:relationship: ${1}
+:hobbies: ${2}
+:isClassmate: ${3}
+:birthday: ${4}
+:race: ${5}
+:END:

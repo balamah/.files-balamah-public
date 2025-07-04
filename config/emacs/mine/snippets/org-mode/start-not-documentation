@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: start-not-documentation
+# key: <D
+# --
+
+#+TITLE: ${1:title}
+#+AUTHOR: ${2:author}
+
+$0

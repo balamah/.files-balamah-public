@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Create temporary directory, which has this structure
+# -------------------------------------------------------
+# /tmp/.files-balamah/
+# ├── 10-curWeather.tmp
+# ├── 20-curWallpaper.tmp
+# ├── aliases.zsh
+# ├── dashboard
+# ├── playerctl
+# │   ├── loop
+# │   ├── mute
+# │   ├── volume
+# │   └── shuffle
+# ├── previous-colorscheme
+# ├── recent
+# │   └── wallpapers
+# └── temporary-config.el
+
+mkdir -p /tmp/.files-balamah/{recent,playerctl,widgets}
+mkdir -p /tmp/.files-balamah/playerctl/{loop,shuffle,mute,volume}
+
+touch /tmp/.files-balamah/{aliases.zsh,temporary-config.el,previous-colorscheme}
+~/.config/scripts/get/weather > /tmp/.files-balamah/10-curWeather.tmp

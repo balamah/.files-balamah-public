@@ -1,0 +1,69 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+. ~/.files-balamah/config/scripts/functions.sh 
+
+additional=~/.config/scripts/additional
+previousColorschemeFile=/tmp/.files-balamah/previous-colorscheme
+previousColorscheme=$(cat $previousColorschemeFile)
+wallpaper=$(cat /tmp/.files-balamah/20-curWallpaper.tmp)
+
+echo "$colorscheme" > $previousColorschemeFile
+
+picomRestart() {
+	killall -9 "$picom"-picom && ~/.config/scripts/startup/50-compositor-start 
+}
+
+getColorschemeFile() {
+	case "$colorscheme" in
+		 "onedark-gray"|"onedark-cyan") echo 'onedark.json' ;;
+		 *) echo "$colorscheme"                             ;;
+	esac
+}
+
+setTelegramBackground() {
+	[ "$telegramBackground" = 'current' ] && \
+		background="$wallpaper" || \
+		background="$telegramBackground"
+
+	# couldn't make it elegant
+	if [ "$enablePywalTelegramBackground" = 'no' ] && isPywalColorscheme; then
+		$additional/wal-telegram/wal-telegram --wal -r
+	else	
+		$additional/wal-telegram/wal-telegram --wal -r -b "$background"
+	fi
+}
+
+applyPywal() {
+	python3 -m pywal -i "$wallpaper"
+
+	emacsclient -s 'default' -e "(enable-ewal)" &
+}
+
+applyOtherColorschemes() {
+	xrdb -merge ~/.config/colorschemes/$colorscheme.Xresources
+
+	emacsclient -s 'default' -e "(disable-ewal)"
+
+	isPywalEnabled && \
+		python3 -m pywal --theme ~/.config/colorschemes/pywal/$(getColorschemeFile)
+
+	[ "$transparencyWithoutPywal" = 'no' ] && \
+		xrdb -merge ~/.config/colorschemes/st-no-alpha.Xresources 
+}
+
+# update colorscheme for apps
+xrdb -load /dev/null 
+
+isPywalColorscheme && applyPywal || applyOtherColorschemes
+$additional/build-zathura-config > ~/.config/zathura/zathurarc
+
+isPywalEnabled && python3 -m pywalfox update &
+isPywalEnabled && setTelegramBackground &
+
+# change picom config
+[ "$colorscheme" != "$previousColorscheme" ] || \
+	[ "$picomRestartSameColorscheme" = 'yes' ] && picomRestart
+
+# apply colorscheme for window managers
+dwmc xrdb

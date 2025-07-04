@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# $1 :: widget script path
+
+. ~/.files-balamah/config/scripts/functions.sh 
+
+[ -z "$1" ] && printParameters && exit 1
+
+echo On > "/tmp/.files-balamah/widgets/${1##*/}"
+
+cat "$1" | grep -E -o "^[a-zA-Z]+ " | sort | uniq | xargs -r killall -9

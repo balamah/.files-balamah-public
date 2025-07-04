@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: header-difficulty-no-blank-lines
+# key: difficultyn:::
+# --
+
+:PROPERTIES:
+:DIFFICULTY: ${1:difficulty}
+:END:
+$0

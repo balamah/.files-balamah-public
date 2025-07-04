@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cat ~/.config/scripts/resources/dmenu/applications | \
+	dmenu -p "󰀻 Open application" -l 15 | awk '{print $3}' | \
+	xargs ~/.config/scripts/launch

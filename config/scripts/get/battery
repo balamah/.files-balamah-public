@@ -1,0 +1,5 @@
+#!/bin/bash
+
+[ ! -d /sys/class/power_supply/* ] && exit
+
+acpi -b | grep -P -o '[0-9]+(?=%)'

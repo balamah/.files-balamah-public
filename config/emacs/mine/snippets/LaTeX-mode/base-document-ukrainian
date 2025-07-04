@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: base-document-ukrainian
+# key: base:::ukrainian
+# --
+
+\documentclass[14pt, ${1:format}]{article}
+\usepackage[english,ukrainian]{babel}
+\title{${2:title}}
+\author{${3:author}}
+\date{`(insert (format-time-string "%d.%m.%Y" (current-time)))`}
+
+\begin{document}
+\maketitle
+$0
+\end{document}

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. ~/.files-balamah/settings.conf
+
+[ "$deleteJunk" != 'yes' ] && exit
+
+for junk in config/scripts/scripts home/.emacs.d/config/config; do
+	junkPath=~/.files-balamah/$junk
+	[ -d "$junkPath" ] && rm -r "$junkPath"
+done

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: interface
+# key: interface
+# --
+
+public interface `(file-name-sans-extension (file-name-nondirectory buffer-file-name))` {
+    $0
+}

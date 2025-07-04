@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. ~/.files-balamah/settings.conf 
+
+[ "$profile" != 'dwm' ] || [ "$panelIndicatorsVariation" != 'dwmblocks' ] && exit
+
+pkill -RTMIN+4 dwmblocks 

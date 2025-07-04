@@ -1,0 +1,6 @@
+#!/bin/sh
+
+url="https://bible-api.com/data/kjv/random/PRO,REV,JAS,COL,GAL,1CO,2CO,DEU" 
+jqCommand='"\(.random_verse.text) - \(.random_verse.book) \(.random_verse.chapter):\(.random_verse.verse)"' 
+
+curl -s "$url" | jq -r "$jqCommand"

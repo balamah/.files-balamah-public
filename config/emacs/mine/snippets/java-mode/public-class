@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: public-class
+# key: class
+# --
+
+public class `(file-name-sans-extension (file-name-nondirectory buffer-file-name))` {
+	$0
+}

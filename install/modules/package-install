@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. ~/.files-balamah/install/modules/functions.sh 
+. ~/.files-balamah/settings.conf
+
+command=$(getPackageManager)
+
+case "$1" in
+	'--wsl') packages=$wslPackagesList ;;
+	*) packages=$packagesList ;;
+esac
+
+eval sudo "$command" $(cat $packages/$distro | rmodd)
+
+[ "$distro" = debian ] && \
+	pip install -r ~/.files-balamah/requirements.txt || \
+	pip install -r ~/.files-balamah/requirements.txt --break-system-packages

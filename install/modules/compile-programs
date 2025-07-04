@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Compiles everything from ~/.config/compile/
+# Here i keep suckless software 
+# and some lightweight software which is not on official repos
+
+find ~/.config/compile/ -type f -name 'Makefile' | \
+	while read file; do
+		directory="${file%/*}"
+	    printf '=%.0s' {1..21} && echo " Compiling ${directory##*/}..."
+
+		cd "$directory" && make && sudo make clean install
+	done

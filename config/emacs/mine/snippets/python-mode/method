@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: method
+# key: cdef()
+# --
+
+def ${1:methodName}(self, ${2:parameters}) -> ${3:rtype}:
+	$0

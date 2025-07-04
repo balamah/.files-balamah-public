@@ -1,0 +1,21 @@
+! -*- mode: conf-xdefaults -*-
+
+st.color0:      #282C34
+st.color1:      #E06C75
+st.color2:      #98C379
+st.color3:      #E5C07B
+st.color4:      #61AFEF
+st.color5:      #C678DD
+st.color6:      #56B6C2
+st.color7:      #ABB2BF
+st.color8:      #575e60
+st.color9:      #E06C75
+st.color10:     #98C379
+st.color11:     #E5C07B
+st.color12:     #61AFEF
+st.color13:     #C678DD
+st.color14:     #56B6C2
+st.color15:     #ABB2BF
+st.background:  #282C34
+st.foreground:  #ABB2BF
+st.cursorColor: #ABB2BF

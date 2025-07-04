@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# The script allows cron to send notifications.
+# I made this script to avoid repetition in crontab.
+# $1 :: program name
+# $2 :: message
+# $3 :: urgency (optional)
+
+. ~/.files-balamah/config/scripts/functions.sh 
+. ~/.files-balamah/settings.conf 
+
+[ "$enableCronNotifications" = 'no' ] && exit
+
+notify() {
+	XDG_RUNTIME_DIR=/run/user/$(id -u) notify-send "$1" "$2" ${3:+-u "$3"}
+}
+
+DNDtime() {
+	time=$(date +'%H:%M')
+	
+	[[ "$time" > "$DNDtimeBegin" ]] || [[ "$time" < "$DNDtimeEnd" ]] && \
+		echo "$DNDtimeBegin < $time < $DNDtimeEnd" && exit 1
+}
+
+[ "$enableDNDtime" = 'yes' ] && DNDtime
+
+[ -z "$1" ] || [ -z "$2" ] && printParameters && exit 1
+
+pgrep -x slock && notify "$1" "$2" critical && exit
+
+notify "$1" "$2" "$3"

@@ -1,0 +1,32 @@
+#!/bin/sh
+
+distro=$(~/.config/scripts/get/distro/name)
+
+case "$distro" in
+	"ubuntu") logo="" ;;
+	"debian") logo="" ;;
+	"mint") logo="󰣭" ;;
+	"lmde") logo="󰣭" ;;
+	"pop_os") logo="" ;;
+	"manjaro") logo="" ;;
+	"fedora") logo="" ;;
+	"endeavour") logo="" ;;
+	"elementary") logo="" ;;
+	"raspbian") logo="" ;;
+	"parrot") logo="" ;;
+	"solus") logo="" ;;
+	"mageia") logo="" ;;
+	"opensuse") logo="" ;;
+	"nixos") logo="" ;;
+	"arch") logo="" ;;
+	"artix") logo="" ;;
+	"void") logo="" ;;
+	"gentoo") logo="󰣨" ;;
+	"slackware") logo="" ;;
+	"devuan") logo="" ;;
+	"guix") logo="" ;;
+	"freebsd") logo="" ;;
+	*) logo="󰌧" ;;
+esac
+
+echo $logo

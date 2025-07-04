@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: diary-calendar-repeat
+# key: <%%
+# --
+
+<%%(memq (calendar-day-of-week date) '($0))>

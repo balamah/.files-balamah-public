@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: array-not-in
+# key: (!in()
+# --
+
+(!(in_array(${1:value}, $0))

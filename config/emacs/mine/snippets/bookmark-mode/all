@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: bookmark-all
+# key: all:
+# --
+
+!ALL: | ${1:directory} | ${2:type} | ${3:pattern}

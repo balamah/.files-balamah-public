@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# $1 :: [up, down, mute, unmute]
+
+. ~/.files-balamah/config/scripts/functions.sh 
+. ~/.files-balamah/settings.conf
+
+[ -z "$1" ] && printParameters && exit 1
+
+notify() {
+	~/.config/scripts/get/volume-amount | xargs -I "%" \
+		dunstify -u low -r 9260 -h int:value:"%" "Volume: %" -t 1000
+}
+
+unmute() {
+	pactl set-sink-mute @DEFAULT_SINK@ 0
+}
+
+up() {
+	newVolume=$(~/.config/scripts/get/volume-amount | sed "s/%//g" | xargs -I "%" \
+				echo "% + $volumeAmount" | bc)
+
+	[ "$newVolume" -gt "100" ] && [ "$enableLimitVolume" = 'yes' ] && \
+		pactl set-sink-volume @DEFAULT_SINK@ 100% || \
+        pactl set-sink-volume @DEFAULT_SINK@ +$volumeAmount%
+
+	unmute
+	notify
+}
+
+down() {
+	pactl set-sink-volume @DEFAULT_SINK@ -$volumeAmount%
+
+	unmute
+	notify
+}
+
+mute() {
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
+	[ "$(pamixer --get-mute)" = 'true' ] && \
+		dunstify -a "volume-control" -t 2000 -r 9260 -u low "Audio muted" || \
+		notify up
+}
+
+case "$1" in
+	'up') up ;;
+	'down') down ;;
+	'mute') mute ;;
+esac
+
+~/.config/scripts/update/volume 

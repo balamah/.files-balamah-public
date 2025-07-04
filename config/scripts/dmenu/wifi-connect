@@ -1,0 +1,14 @@
+#!/bin/sh
+
+name=$(nmcli -f SSID,SIGNAL,RATE,BARS,SECURITY dev wifi list | \
+		   sed -n '1!p' | dmenu -i -l 20 -p "󰖩 Choose wifi network to connect")
+
+[ -z "$name" ] && exit
+
+password=$(echo | dmenu -p "Enter network password" -P)
+
+[ -z "$password" ] && exit
+
+nmcli device wifi connect "${name%%  *}" password "$password" && \
+	notify-send "${0##*/}" "Successfully connected to $name" || \
+	notify-send "${0##*/}" "Failed to connect to $name"
