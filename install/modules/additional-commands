@@ -47,7 +47,7 @@ bash -c \
 # In zathura config, you can't use $HOME, ~ and user things to execute
 # your scripts, you have to use sucking /home/username which can't be
 # the same on other systems
-~/.config/scripts/additional/generate-zathura-pywal > ~/.config/zathura/zathurarc 
+~/.config/scripts/additional/build-zathura-config > ~/.config/zathura/zathurarc 
 
 # install tmux plugin manager
 [ "$enableTmuxPlugins" = 'yes' ] && \
